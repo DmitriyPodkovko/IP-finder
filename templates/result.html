@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Result</title>
+    {% load static %}
+    <link href="{% static 'result.css' %}" rel="stylesheet">
+
+</head>
+<body>
+    <h1>RESULTS:</h1>
+    <ul>
+        {% for file_name in result_files %}
+            <li>
+                <a href="{{ file_name }}" download>Download {{ file_name }}</a>
+                <button onclick="deleteFile('{{ file_name }}')">Delete</button>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+
+<script>
+    function deleteFile(fileName) {
+        if (confirm('Вы уверены, что хотите удалить файл "' + fileName + '"?')) {
+            fetch('/delete_file/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}', // Добавляем CSRF-токен
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'file_name=' + fileName,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем страницу после успешного удаления
+                    location.reload();
+                } else {
+                    alert('Не удалось удалить файл.');
+                }
+            });
+        }
+    }
+</script>
+
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Main</title>
+<!--    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+</head>
+<body>
+<b> SELECT THE FOLDER FROM CHOOSER BELOW: </b>
+<br>
+
+<form method="POST" class="post-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">Save</button>
+
+</form>
+
+<!--<form id="scanForm" method="post">-->
+<!--         {% csrf_token %}-->
+<!--         <input type="text" id="folderPathInput" name="folder_path" required readonly>-->
+<!--         <button type="button" id="selectFolderBtn">Select Folder</button>-->
+<!--         <button type="submit" name="folder_submit">Scan Folder</button>-->
+<!--</form>-->
+
+<!--<script>-->
+<!--        $(document).ready(function() {-->
+<!--            $('#selectFolderBtn').click(function() {-->
+<!--                // Open a file input dialog to select a file-->
+<!--                $('<input type="file" id="folderInput" style="display:none;">').change(function() {-->
+<!--                    var folderPath = $(this).val();-->
+<!--                    if (folderPath) {-->
+<!--                        // Set the selected folder path in the input field-->
+<!--                        $('#folderPathInput').val(folderPath);-->
+<!--                    }-->
+<!--                }).click();-->
+<!--            });-->
+<!--        });-->
+<!--</script>-->
+</body>
+</html>

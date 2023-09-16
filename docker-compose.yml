@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  django:
+    container_name: IP-finder-django-pda
+    build: .
+#    image: ip-finder-django:latest
+#      dockerfile: Dockerfile
+#      context: .
+#    command: sh -c "gunicorn --bind 0.0.0.0:8000 config.wsgi"
+#    command: python manage.py migrate --no-input && \
+#             python manage.py collectstatic --no-input && \
+#             python manage.py runserver 0.0.0.0:8000
+# if EXPOSE not specified in Dockerfile
+#    expose:
+#      - 8000
+    ports:
+      - "8247:8247"
+    env_file:
+      - .env
+#    environment:
+
+    volumes:
+#      - .:/IP-finder
+      - static:/IP-finder/static
+      - result:/IP-finder/result
+
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: "2"
+#          memory: 2GB
+
+  nginx:
+    container_name: IP-finder-nginx-pda
+    build: ./nginx
+#    image: ip-finder-nginx:latest
+    volumes:
+      - static:/static
+      - result:/result
+    ports:
+      - "80:80"
+    depends_on:
+      - django
+
+#  oracle-client:
+#    container_name: IP-finder-oracle-client-pda
+#    build: ./OracleInstantClient
+#    #    image: ip-finder-oracle-client:latest
+#    command: python3 -m pip install cx_Oracle --upgrade
+#    volumes:
+#      - client:/usr/lib/oracle/21/client64/bin
+#    ports:
+#      - "1521:1521"
+
+volumes:
+  static:
+  result:
+#  client:
+

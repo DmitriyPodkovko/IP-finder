@@ -1,0 +1,23 @@
+*.DS_Store
+*.xls
+*.xlsx
+*.csv
+*.log
+
+# Git
+.git
+.gitignore
+
+# Docker
+.docker
+
+# Python
+*.idea/
+*/__pycache__/
+.env
+.venv
+env/
+venv/
+
+# Local PostgreSQL data
+#data/
