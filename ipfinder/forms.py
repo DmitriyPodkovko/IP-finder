@@ -7,6 +7,7 @@ class MultipleFileInput(forms.ClearableFileInput):
 
 class MultipleFileField(forms.FileField):
     def __init__(self, *args, **kwargs):
+        # if not specified in index.html <input ... accept=".xlsx">
         # kwargs.setdefault("widget", MultipleFileInput(attrs={'accept': '.xlsx'}))
         kwargs.setdefault("widget", MultipleFileInput())
         super().__init__(*args, **kwargs)

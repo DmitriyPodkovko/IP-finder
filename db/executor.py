@@ -2,13 +2,12 @@ import logging
 import cx_Oracle
 from django.db import connections
 from datetime import datetime
+from config.settings import (ORACLE_FUNCTIONS,
+                             INNER_IPS,
+                             OPERATORS)
 
-from config.settings import ORACLE_FUNCTIONS, INNER_IPS, OPERATORS
-
-cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
-
-# for deploy
-# cx_Oracle.init_oracle_client(lib_dir="/usr/lib/oracle/21/client64/lib")
+# for development
+# cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
 
 
 class DBExecutor:
@@ -35,7 +34,6 @@ class DBExecutor:
 
     def execute(self, ip_tuple: tuple) -> set:
         try:
-            logging.info(f'aaaaaaaa')
             result = set()
             self._ip_tuple = ip_tuple
             ip = self._ip_tuple[0]
@@ -44,19 +42,14 @@ class DBExecutor:
             operator = OPERATORS.get(self._ip_tuple[4])
             dt = datetime.strptime(self._ip_tuple[2] + ' ' + self._ip_tuple[3],
                                    '%d.%m.%Y %H:%M:%S')
-            logging.info(f'bbbbbbbbbb')
             if first_part_ip in INNER_IPS:
-                logging.info(f'ccccccccccccc inner_tel_func')
                 oracle_func = ORACLE_FUNCTIONS.get('inner_tel_func')
                 ref_cursor = self._cursor.callfunc(oracle_func, cx_Oracle.CURSOR,
                                                    [ip, operator, dt])
-                logging.info(f'ddddddddddddd')
             else:
-                logging.info(f'ccccccccccccc tel_func')
                 oracle_func = ORACLE_FUNCTIONS.get('tel_func')
                 ref_cursor = self._cursor.callfunc(oracle_func, cx_Oracle.CURSOR,
                                                    [ip, port, operator, dt])
-                logging.info(f'dddddddddddddddddfffffffffffff')
             logging.info(f'{oracle_func}, {ip}, {port}, {operator}, {dt}')
             if ref_cursor:
                 for row in ref_cursor.fetchall():
