@@ -49,8 +49,6 @@ class ExcelHandler:
             self._new_column_idx = sheet.max_column + 1
             sheet.cell(row=1, column=self._new_column_idx, value=DESTINATION_NUMBER)
             file_name, file_extension = os.path.splitext(self._xlsx_file.name)
-            if not os.path.exists(RESULT_DIRECTORY):
-                os.makedirs(RESULT_DIRECTORY)
             self._xlsx_output_file = f'{RESULT_DIRECTORY}/{file_name}{EXCEL_OUTPUT_FILE_PREFIX}.xlsx'
             workbook.save(self._xlsx_output_file)
             workbook.close()

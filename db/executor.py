@@ -3,8 +3,12 @@ import cx_Oracle
 from django.db import connections
 from datetime import datetime
 from config.settings import (ORACLE_FUNCTIONS,
-                             INNER_IPS,
-                             OPERATORS)
+                             OPERATORS,
+                             MOB3_INNER_IPS,
+                             MTS_INNER_IPS,
+                             KS_INNER_IPS,
+                             LIFE_INNER_IPS)
+
 
 # for development
 # cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
@@ -42,7 +46,8 @@ class DBExecutor:
             operator = OPERATORS.get(self._ip_tuple[4])
             dt = datetime.strptime(self._ip_tuple[2] + ' ' + self._ip_tuple[3],
                                    '%d.%m.%Y %H:%M:%S')
-            if first_part_ip in INNER_IPS:
+            checkout = CheckoutInnerIP(first_part_ip, operator)
+            if checkout.check_inner():
                 oracle_func = ORACLE_FUNCTIONS.get('inner_tel_func')
                 ref_cursor = self._cursor.callfunc(oracle_func, cx_Oracle.CURSOR,
                                                    [ip, operator, dt])
@@ -59,3 +64,38 @@ class DBExecutor:
         except Exception as e:
             logging.error(f'DB error execute:\n {str(e)}')
             return {'380000000000'}
+
+
+class CheckoutInnerIP:
+
+    def __init__(self, first_part_ip, operator):
+        self._first_part_ip = first_part_ip
+        self._operator = operator
+
+    def check_inner(self):
+        default = 'Incorrect operator'
+        return getattr(self, f'_case_{self._operator}', lambda: default)()
+
+    def _case_3MOB(self) -> bool:
+        if self._first_part_ip in MOB3_INNER_IPS:
+            logging.info(f'_case_3MOB -> True')
+            return True
+        return False
+
+    def _case_MTS(self) -> bool:
+        if self._first_part_ip in MTS_INNER_IPS:
+            logging.info(f'_case_MTS -> True')
+            return True
+        return False
+
+    def _case_KS(self) -> bool:
+        if self._first_part_ip in KS_INNER_IPS:
+            logging.info(f'_case_KS -> True')
+            return True
+        return False
+
+    def _case_LIFE(self) -> bool:
+        if self._first_part_ip in LIFE_INNER_IPS:
+            logging.info(f'_case_LIFE -> True')
+            return True
+        return False

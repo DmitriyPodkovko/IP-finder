@@ -10,16 +10,28 @@
 
 </head>
 <body>
-    <h1>RESULTS:</h1>
-    <ul>
-        {% for file_name in result_files %}
-            <li>
-                <a href="{{ file_name }}" download>Download {{ file_name }}</a>
-                <button onclick="deleteFile('{{ file_name }}')">Delete</button>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="wrapper">
+        <header>RESULTS</header>
+        <div class="content">
+            <ul class="links">
+                {% for file_name in result_files %}
+                    <li class="details">
+                        <a class="name" href="{{ file_name }}" download>Download {{ file_name }}</a>
+                        <button class="delete" onclick="deleteFile('{{ file_name }}')">Delete</button>
+                    </li>
+                {% endfor %}
+            </ul>
+<!--            <div class="mainButton">-->
+<!--                <button class="download">-->
+<!--                    <span class="btn-text" user-select="none">Download All</span>-->
+<!--                </button>-->
+<!--            </div>-->
+        </div>
+    </div>
+
 </body>
+
+</html>
 
 <script>
     function deleteFile(fileName) {
@@ -44,5 +56,3 @@
         }
     }
 </script>
-
-</html>

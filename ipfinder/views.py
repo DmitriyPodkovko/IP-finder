@@ -11,6 +11,8 @@ from config.settings import (RESULT_DIRECTORY,
                              DEBUG, DATABASES,
                              ALLOWED_HOSTS)
 
+if not os.path.exists(RESULT_DIRECTORY):
+    os.makedirs(RESULT_DIRECTORY)
 logging.basicConfig(filename=f'{RESULT_DIRECTORY}/ipfinder.log',
                     level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')

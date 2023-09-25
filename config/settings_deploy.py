@@ -119,7 +119,6 @@ ORACLE_FUNCTIONS = {
     'tel_func': 'NEVA.ip_tr.restore_tel_from_ip_list',
     'inner_tel_func': 'NEVA.ip_tr.restore_tel_from_inner_ip_list'
 }
-INNER_IPS = (10, 100, 192, 11, 111, 37, 134, 188)
 
 OPERATORS = {
     '3Mob': '3MOB',
@@ -141,6 +140,11 @@ OPERATORS = {
     'LIFECELL': 'LIFE',
     'life:)': 'LIFE'
 }
+
+MOB3_INNER_IPS = (10, 37, 192)
+MTS_INNER_IPS = (10, 11, 100, 192)
+KS_INNER_IPS = (10, 11, 100, 111, 134, 188, 192, '2a02')
+LIFE_INNER_IPS = (10, 11, 100, 192)
 
 # Output params:
 # Excel result column name
