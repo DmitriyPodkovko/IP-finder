@@ -11,14 +11,14 @@ from config.settings import (ORACLE_FUNCTIONS,
 
 
 # for development
-# cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
+cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
 
 
 class DBExecutor:
     def __init__(self) -> None:
         self._cursor = None
         self._ip_tuple = None
-        logging.info(f'init DBExecutor')
+        # logging.info(f'init DBExecutor')
 
     def connect_on(self) -> bool:
         try:
@@ -49,13 +49,16 @@ class DBExecutor:
             checkout = CheckoutInnerIP(first_part_ip, operator)
             if checkout.check_inner():
                 oracle_func = ORACLE_FUNCTIONS.get('inner_tel_func')
+                logging.info(f'{oracle_func}, {ip}, {operator}, {dt}')
                 ref_cursor = self._cursor.callfunc(oracle_func, cx_Oracle.CURSOR,
                                                    [ip, operator, dt])
+                logging.info(f'request done')
             else:
                 oracle_func = ORACLE_FUNCTIONS.get('tel_func')
+                logging.info(f'{oracle_func}, {ip}, {port}, {operator}, {dt}')
                 ref_cursor = self._cursor.callfunc(oracle_func, cx_Oracle.CURSOR,
                                                    [ip, port, operator, dt])
-            logging.info(f'{oracle_func}, {ip}, {port}, {operator}, {dt}')
+                logging.info(f'request done')
             if ref_cursor:
                 for row in ref_cursor.fetchall():
                     for i in row:
@@ -78,24 +81,24 @@ class CheckoutInnerIP:
 
     def _case_3MOB(self) -> bool:
         if self._first_part_ip in MOB3_INNER_IPS:
-            logging.info(f'_case_3MOB -> True')
+            logging.info(f'_case_3MOB for inner func -> True')
             return True
         return False
 
     def _case_MTS(self) -> bool:
         if self._first_part_ip in MTS_INNER_IPS:
-            logging.info(f'_case_MTS -> True')
+            logging.info(f'_case_MTS for inner func -> True')
             return True
         return False
 
     def _case_KS(self) -> bool:
         if self._first_part_ip in KS_INNER_IPS:
-            logging.info(f'_case_KS -> True')
+            logging.info(f'_case_KS for inner func -> True')
             return True
         return False
 
     def _case_LIFE(self) -> bool:
         if self._first_part_ip in LIFE_INNER_IPS:
-            logging.info(f'_case_LIFE -> True')
+            logging.info(f'_case_LIFE for inner func -> True')
             return True
         return False

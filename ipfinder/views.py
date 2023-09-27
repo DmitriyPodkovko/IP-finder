@@ -1,6 +1,7 @@
 import os
 import logging
 from django.http import JsonResponse
+from django.views import View
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
 from django.urls import reverse_lazy
@@ -22,6 +23,7 @@ logging.info(f'DEBUG = {DEBUG}')
 logging.info(f"DATABASES = {DATABASES.get('filter')}")
 # logging.info(f'STATIC_URL = {STATIC_URL}')
 logging.info(f'ALLOWED_HOSTS = {ALLOWED_HOSTS}')
+is_task_cancelled = False
 
 # def index(request):
 #     print('qwerty')
@@ -43,21 +45,31 @@ class FileFieldFormView(FormView):
             return self.form_invalid(form)
 
     def form_valid(self, form):
-        files = form.cleaned_data["file_field"]
-        # logging.info(f'{self.request.META}')
-        logging.info(files)
-        for f in files:  # Do with each file.
-            logging.info(f'{f}')
-            excel_handler = ExcelHandler(f)
-            ip_list = excel_handler.get_ip_list_from_xlsx_file()
-            excel_handler.create_output_xlsx_file()
-            db_executor = DBExecutor()
-            if db_executor.connect_on():
-                for i in ip_list:
-                    DST_set = db_executor.execute(i)
-                    logging.info(f'DST_set from views: {DST_set}')
-                    excel_handler.save_result_to_output_xlsx_file(DST_set)
-                db_executor.connect_off()
+        global is_task_cancelled
+        try:
+            files = form.cleaned_data["file_field"]
+            # logging.info(f'{self.request.META}')
+            logging.info(files)
+            for f in files:  # Do with each file.
+                logging.info(f'GET: {f}')
+                if is_task_cancelled:
+                    logging.info("TASK CANCELLED !!!")
+                    break
+                excel_handler = ExcelHandler(f)
+                ip_list = excel_handler.get_ip_list_from_xlsx_file()
+                excel_handler.create_output_xlsx_file()
+                db_executor = DBExecutor()
+                if db_executor.connect_on():
+                    for i in ip_list:
+                        if is_task_cancelled:
+                            logging.info("TASK CANCELLED !!!")
+                            break
+                        DST_set = db_executor.execute(i)
+                        logging.info(f'response: {DST_set}')
+                        excel_handler.save_result_to_output_xlsx_file(DST_set)
+                    db_executor.connect_off()
+        finally:
+            is_task_cancelled = False
         return super().form_valid(form)
 
 
@@ -71,6 +83,14 @@ class FileResultView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['result_files'] = os.listdir(RESULT_DIRECTORY)
         return context
+
+
+class CancelTaskView(View):
+    def post(self, request, *args, **kwargs):
+        global is_task_cancelled
+        logging.info("TASK CANCELLATION REQUESTED ...")
+        is_task_cancelled = True
+        return JsonResponse({"status": "cancelled"})
 
 
 def delete_file(request):

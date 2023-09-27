@@ -69,6 +69,6 @@ class ExcelHandler:
             workbook.save(self._xlsx_output_file)
             workbook.close()
             self._current_row += 1
-            logging.info(f'SAVED: {self._xlsx_output_file}')
+            logging.info(f'saved')
         except Exception as e:
             logging.error(f'Error saving .xlsx:\n {self._xlsx_file} ({str(e)})')

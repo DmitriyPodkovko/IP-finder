@@ -30,6 +30,7 @@
         <section id="fileList" class="uploaded-area  sortable-list">
 
         </section>
+
         <div class="button" id="upload">
             <div class="content">
                 <i class="bi bi-cloud-arrow-down">
@@ -45,6 +46,13 @@
                 <button form="handler" type="submit" class="button-text">Upload</button>
             </div>
         </div>
+
+        <div class="button" id="cancel">
+            <div class="content">
+                <span class="button-text" id="cancel-text">Cancel</span>
+            </div>
+        </div>
+
     </div>
 </body>
 
@@ -114,15 +122,10 @@
     </li>
   `;
 
-           
             fileList.insertAdjacentHTML('beforeend',data);
-
-
-
 
             const sortableList = document.querySelector(".sortable-list");
             const items = sortableList.querySelectorAll(".item");
-
 
             /* document.addEventListener("dragstart", (event)=>{
                  event.target.classList.toggle("dragging");
@@ -152,5 +155,24 @@
           
         }
         })
+
+const cancelButton = document.getElementById("cancel");
+const cancelText = document.getElementById("cancel-text");
+const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+cancelButton.addEventListener("click", async () => {
+    cancelText.innerText = "Cancelling...";
+    const response = await fetch("/cancel-task/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrfToken, // Add a CSRF-token
+        },
+    });
+    if (response.ok) {
+        cancelText.innerText = "Cancelled";
+    } else {
+        cancelText.innerText = "Error";
+    }
+});
 
 </script>
