@@ -46,7 +46,7 @@ class ExcelHandler:
             self._cell_style.font = sheet.cell(row=1, column=1).font.copy()
             self._cell_style.border = sheet.cell(row=1, column=1).border.copy()
             if EXCEL_ROW_COLUMN.get('default').get('DST') >= 0:
-                self._DST_column_idx = EXCEL_ROW_COLUMN.get('default').get('DST')
+                self._DST_column_idx = EXCEL_ROW_COLUMN.get('default').get('DST') + 1
             else:
                 self._DST_column_idx = sheet.max_column + 1
                 sheet.cell(row=1, column=self._DST_column_idx, value=DESTINATION_NUMBER)
