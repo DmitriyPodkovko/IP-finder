@@ -12,7 +12,7 @@
 
 <body>
     <div class="wrapper">
-        <a class="" href="{% url 'result' %}">RESULTS</a>
+        <a href="{% url 'result' %}" target="_blank">RESULTS</a>
         <header>IP-FINDER</header>
         <form id="handler" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
