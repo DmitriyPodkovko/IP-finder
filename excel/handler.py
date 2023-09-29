@@ -13,7 +13,7 @@ class ExcelHandler:
     def __init__(self, xlsx_file) -> None:
         self._xlsx_file = xlsx_file
         self._cell_style = None
-        self._new_column_idx = None
+        self._DST_column_idx = None
         self._xlsx_output_file = None
         self._current_row = EXCEL_ROW_COLUMN.get('default').get('Start_row')
 
@@ -24,7 +24,6 @@ class ExcelHandler:
             sheet = workbook.active
             for row in sheet.iter_rows(min_row=EXCEL_ROW_COLUMN.get('default').get('Start_row'), values_only=True):
                 ip_tuple = (
-                    # row[EXCEL_ROW_COLUMN.get('default').get('SKP')],
                     row[EXCEL_ROW_COLUMN.get('default').get('IP_DST')],
                     row[EXCEL_ROW_COLUMN.get('default').get('Port_DST')],
                     row[EXCEL_ROW_COLUMN.get('default').get('Date')],
@@ -46,8 +45,11 @@ class ExcelHandler:
             self._cell_style = NamedStyle(name='cell_style')
             self._cell_style.font = sheet.cell(row=1, column=1).font.copy()
             self._cell_style.border = sheet.cell(row=1, column=1).border.copy()
-            self._new_column_idx = sheet.max_column + 1
-            sheet.cell(row=1, column=self._new_column_idx, value=DESTINATION_NUMBER)
+            if EXCEL_ROW_COLUMN.get('default').get('DST') >= 0:
+                self._DST_column_idx = EXCEL_ROW_COLUMN.get('default').get('DST')
+            else:
+                self._DST_column_idx = sheet.max_column + 1
+                sheet.cell(row=1, column=self._DST_column_idx, value=DESTINATION_NUMBER)
             file_name, file_extension = os.path.splitext(self._xlsx_file.name)
             self._xlsx_output_file = f'{RESULT_DIRECTORY}/{file_name}{EXCEL_OUTPUT_FILE_PREFIX}.xlsx'
             workbook.save(self._xlsx_output_file)
@@ -60,12 +62,11 @@ class ExcelHandler:
         try:
             workbook = openpyxl.load_workbook(self._xlsx_output_file)
             sheet = workbook.active
-            next_column_idx = self._new_column_idx
+            current_column_idx = self._DST_column_idx
             for i, value in enumerate(dst_set, start=self._current_row):
-                new_cell = sheet.cell(row=self._current_row, column=next_column_idx, value=value)
+                new_cell = sheet.cell(row=self._current_row, column=current_column_idx, value=value)
                 new_cell.style = self._cell_style
-                next_column_idx += 1
-                workbook.save(self._xlsx_output_file)
+                current_column_idx += 1
             workbook.save(self._xlsx_output_file)
             workbook.close()
             self._current_row += 1

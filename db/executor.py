@@ -11,7 +11,7 @@ from config.settings import (ORACLE_FUNCTIONS,
 
 
 # for development
-cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
+# cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
 
 
 class DBExecutor:

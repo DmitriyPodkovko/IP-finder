@@ -111,7 +111,7 @@ EXCEL_ROW_COLUMN = {
         'Date': 6,
         'Time': 7,
         'Provider': 8,
-        'SKP': 1,
+        'DST': 10,
     }
 }
 
