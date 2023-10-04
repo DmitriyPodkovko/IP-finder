@@ -18,7 +18,9 @@
                 {% for file_name in result_files %}
                     <li class="details">
                         <a class="name" href="{{ file_name }}" download>Download {{ file_name }}</a>
-                        <button class="delete" onclick="deleteFile('{{ file_name }}')">Delete</button>
+                        <button class="delete" onclick="deleteFile('{{ file_name }}')">
+                            <span class="btn-text" user-select="none">Delete</span>
+                        </button>
                     </li>
                 {% endfor %}
             </ul>

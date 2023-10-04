@@ -141,10 +141,15 @@ OPERATORS = {
     'life:)': 'LIFE'
 }
 
-MOB3_INNER_IPS = (10, 37, 192)
-MTS_INNER_IPS = (10, 11, 100, 192)
-KS_INNER_IPS = (10, 11, 100, 111, 134, 188, 192, '2a02')
-LIFE_INNER_IPS = (10, 11, 100, 192)
+MOB3_IPS = ()
+MTS_IPS = ('46.133', '89.209', '31.144', '128.124', '178.133')
+KS_IPS = ('46.211', '94.153.112')
+LIFE_IPS = ('37.73', '46.96', '88.154', '88.155')
+
+# MOB3_INNER_IPS = (10, 37, 192)
+# MTS_INNER_IPS = (10, 11, 100, 192)
+# KS_INNER_IPS = (10, 11, 100, 111, 134, 188, 192, '2a02')
+# LIFE_INNER_IPS = (10, 11, 100, 192)
 
 # Output params:
 # Excel result column name
