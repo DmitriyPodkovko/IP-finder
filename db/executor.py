@@ -70,6 +70,24 @@ class DBExecutor:
             logging.error(f'DB error execute:\n {str(e)}')
             return {'380000000000'}
 
+    def execute_check_numbers(self, numbers: set) -> set:
+        try:
+            result = set()
+            for number in numbers:
+                oracle_func = ORACLE_FUNCTIONS.get('check_tel_func')
+                logging.info(f'{oracle_func}, {number}')
+                response = self._cursor.callfunc(oracle_func, int,
+                                                 [number])
+                logging.info(f'request done')
+                if bool(response):
+                    result.add(number)
+                else:
+                    logging.info(f'OK')
+            return result
+        except Exception as e:
+            logging.error(f'DB error execute:\n {str(e)}')
+            return result
+
 
 class CheckoutIP:
 

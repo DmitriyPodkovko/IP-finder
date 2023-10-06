@@ -66,6 +66,10 @@ class FileFieldFormView(FormView):
                             break
                         DST_set = db_executor.execute(i)
                         logging.info(f'response: {DST_set}')
+                        if DST_set:
+                            warning_numbers = db_executor.execute_check_numbers(DST_set)
+                            if warning_numbers:
+                                logging.info(f'!!! WARNING NUMBERS: {warning_numbers} !!!')
                         excel_handler.save_result_to_output_xlsx_file(DST_set)
                     db_executor.connect_off()
         finally:

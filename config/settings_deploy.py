@@ -117,7 +117,8 @@ EXCEL_ROW_COLUMN = {
 
 ORACLE_FUNCTIONS = {
     'tel_func': 'NEVA.ip_tr.restore_tel_from_ip_list',
-    'inner_tel_func': 'NEVA.ip_tr.restore_tel_from_inner_ip_list'
+    'inner_tel_func': 'NEVA.ip_tr.restore_tel_from_inner_ip_list',
+    'check_tel_func': 'NEVA.ip_tr.check_tel'
 }
 
 OPERATORS = {
