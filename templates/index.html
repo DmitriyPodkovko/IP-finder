@@ -27,9 +27,7 @@
             <p>Browse File to Upload</p>
         </form>
        
-        <section id="fileList" class="uploaded-area  sortable-list">
-
-        </section>
+        <section id="fileList" class="uploaded-area  sortable-list"></section>
 
         <div class="button" id="upload">
             <div class="content">
@@ -51,6 +49,14 @@
             <div class="content">
                 <span class="button-text" id="cancel-text">Cancel</span>
             </div>
+        </div>
+        <div>
+            {% if warning_numbers %} <br>
+                <span>WARNING NUMBERS:</span>
+                {% for number in warning_numbers %}
+                    <span id="warningNumbers">{{ number }}</span>
+                {% endfor %}
+            {% endif %}
         </div>
 
     </div>
@@ -180,5 +186,21 @@ cancelButton.addEventListener("click", async () => {
         cancelText.innerText = "Error";
     }
 });
+
+window.onload = () => {
+    const warningNumbers = document.getElementById("warningNumbers");
+    const warningNumbersList = document.querySelectorAll("#warningNumbers");
+
+    if (warningNumbers && warningNumbers.innerText.trim() !== "") {
+        let warningNumbersText = "WARNING NUMBERS:\n";
+
+        warningNumbersList.forEach(numberElement => {
+            warningNumbersText += numberElement.innerText + "\n";
+        });
+
+        alert(warningNumbersText);
+    }
+};
+
 
 </script>

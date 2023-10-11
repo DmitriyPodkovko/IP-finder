@@ -35,6 +35,7 @@ class FileFieldFormView(FormView):
     template_name = 'index.html'
     # success_url = reverse_lazy('loaded')
     success_url = reverse_lazy('index')
+    all_warning_numbers = set()
 
     def post(self, request, *args, **kwargs):
         form_class = self.get_form_class()
@@ -64,17 +65,25 @@ class FileFieldFormView(FormView):
                         if is_task_cancelled:
                             logging.info("TASK CANCELLED !!!")
                             break
-                        DST_set = db_executor.execute(i)
-                        logging.info(f'response: {DST_set}')
-                        if DST_set:
-                            warning_numbers = db_executor.execute_check_numbers(DST_set)
+                        DST_numbers = db_executor.execute(i)
+                        logging.info(f'response: {DST_numbers}')
+                        if DST_numbers:
+                            warning_numbers = db_executor.execute_check_numbers(DST_numbers)
                             if warning_numbers:
+                                FileFieldFormView.all_warning_numbers |= warning_numbers
                                 logging.info(f'!!! WARNING NUMBERS: {warning_numbers} !!!')
-                        excel_handler.save_result_to_output_xlsx_file(DST_set)
+                        excel_handler.save_result_to_output_xlsx_file(DST_numbers)
                     db_executor.connect_off()
         finally:
             is_task_cancelled = False
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if FileFieldFormView.all_warning_numbers:
+            context['warning_numbers'] = FileFieldFormView.all_warning_numbers
+            FileFieldFormView.all_warning_numbers = set()
+        return context
 
 
 # class FileLoadedView(TemplateView):
