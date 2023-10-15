@@ -10,6 +10,7 @@ cx-oracle = "*"
 django-db-connection-pool = {extras = ["oracle"], version = "*"}
 django-ninja = "*"
 pydantic = "*"
+aiohttp = "*"
 
 [dev-packages]
 
