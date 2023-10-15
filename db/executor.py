@@ -9,7 +9,7 @@ from config.settings import (ORACLE_FUNCTIONS,
 
 
 # for development
-# cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
+cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
 
 
 class DBExecutor:
@@ -18,7 +18,7 @@ class DBExecutor:
         self._ip_tuple = None
         # logging.info(f'init DBExecutor')
 
-    def connect_on(self) -> bool:
+    async def connect_on(self) -> bool:
         try:
             self._cursor = connections['filter'].cursor()
             logging.info(f'CONNECT ON')
@@ -27,7 +27,7 @@ class DBExecutor:
             logging.error(f'DB error connect on:\n {str(e)}')
             return False
 
-    def connect_off(self) -> None:
+    async def connect_off(self) -> None:
         try:
             self._cursor.close()
             logging.info(f'CONNECT OFF')

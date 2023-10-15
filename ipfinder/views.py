@@ -1,5 +1,8 @@
 import os
+import asyncio
 import logging
+
+from asgiref.sync import sync_to_async, async_to_sync
 from django.http import JsonResponse
 from django.views import View
 from django.views.generic.edit import FormView
@@ -38,14 +41,19 @@ class FileFieldFormView(FormView):
     all_warning_numbers = set()
 
     def post(self, request, *args, **kwargs):
+        logging.info('111111')
         form_class = self.get_form_class()
+        logging.info('aaaaaaa')
         form = self.get_form(form_class)
+        logging.info('bbbbbb')
         if form.is_valid():
+            logging.info('cccccc')
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
 
-    def form_valid(self, form):
+    async def form_valid(self, form):
+        logging.info('22222')
         global is_task_cancelled
         try:
             files = form.cleaned_data["file_field"]
@@ -57,26 +65,38 @@ class FileFieldFormView(FormView):
                     logging.info("TASK CANCELLED !!!")
                     break
                 excel_handler = ExcelHandler(f)
-                ip_list = excel_handler.get_ip_list_from_xlsx_file()
+                ip_list = await self.get_ip_list_from_xlsx_file_async(excel_handler)
                 excel_handler.create_output_xlsx_file()
                 db_executor = DBExecutor()
-                if db_executor.connect_on():
+                if await db_executor.connect_on():
                     for i in ip_list:
                         if is_task_cancelled:
                             logging.info("TASK CANCELLED !!!")
                             break
-                        DST_numbers = db_executor.execute(i)
+                        DST_numbers = await self.execute_async(db_executor, i)
                         logging.info(f'response: {DST_numbers}')
                         if DST_numbers:
-                            warning_numbers = db_executor.execute_check_numbers(DST_numbers)
+                            warning_numbers = await self.execute_check_numbers_async(db_executor, DST_numbers)
                             if warning_numbers:
                                 FileFieldFormView.all_warning_numbers |= warning_numbers
                                 logging.info(f'!!! WARNING NUMBERS: {warning_numbers} !!!')
                         excel_handler.save_result_to_output_xlsx_file(DST_numbers)
-                    db_executor.connect_off()
+                    await db_executor.connect_off()
         finally:
             is_task_cancelled = False
         return super().form_valid(form)
+
+    async def get_ip_list_from_xlsx_file_async(self, excel_handler):
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, excel_handler.get_ip_list_from_xlsx_file)
+
+    async def execute_async(self, db_executor, ip_tuple):
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, db_executor.execute, ip_tuple)
+
+    async def execute_check_numbers_async(self, db_executor, numbers):
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, db_executor.execute_check_numbers, numbers)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
