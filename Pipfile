@@ -8,6 +8,8 @@ openpyxl = "*"
 django = "==3.2.20"
 cx-oracle = "*"
 django-db-connection-pool = {extras = ["oracle"], version = "*"}
+django-ninja = "*"
+pydantic = "*"
 
 [dev-packages]
 
