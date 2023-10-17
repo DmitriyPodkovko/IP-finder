@@ -1,0 +1,2 @@
+class FileResponseCreator:
+    pass

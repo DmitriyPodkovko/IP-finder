@@ -1,8 +1,10 @@
-import os
-from typing import List, Tuple, Any
-import openpyxl
 import logging
+import os
+from typing import Any
+
+import openpyxl
 from openpyxl.styles import NamedStyle
+
 from config.settings import (EXCEL_ROW_COLUMN,
                              DESTINATION_NUMBER,
                              EXCEL_OUTPUT_FILE_PREFIX,
@@ -18,25 +20,26 @@ class ExcelHandler:
         self._current_row = EXCEL_ROW_COLUMN.get('default').get('Start_row')
 
     def get_ip_list_from_xlsx_file(self) -> list[tuple[Any, Any, Any, Any, Any]] | list[Any]:
-        try:
-            ip_list = []
-            workbook = openpyxl.load_workbook(self._xlsx_file)
-            sheet = workbook.active
-            for row in sheet.iter_rows(min_row=EXCEL_ROW_COLUMN.get('default').get('Start_row'), values_only=True):
-                ip_tuple = (
-                    row[EXCEL_ROW_COLUMN.get('default').get('IP_DST')],
-                    row[EXCEL_ROW_COLUMN.get('default').get('Port_DST')],
-                    row[EXCEL_ROW_COLUMN.get('default').get('Date')],
-                    row[EXCEL_ROW_COLUMN.get('default').get('Time')],
-                    row[EXCEL_ROW_COLUMN.get('default').get('Provider')]
-                )
-                ip_list.append(ip_tuple)
-                logging.info(f'IP_DST, Port_DST, Date, Time, Provider: {ip_tuple}')
-            workbook.close()
-            return ip_list
-        except Exception as e:
-            logging.error(f'Error input .xlsx file:\n {self._xlsx_file} ({str(e)})')
-            return []
+        # try:
+        ip_list = []
+        workbook = openpyxl.load_workbook(self._xlsx_file)
+        sheet = workbook.active
+        for row in sheet.iter_rows(min_row=EXCEL_ROW_COLUMN.get('default').get('Start_row'), values_only=True):
+            ip_tuple = (
+                row[EXCEL_ROW_COLUMN.get('default').get('IP_DST')],
+                row[EXCEL_ROW_COLUMN.get('default').get('Port_DST')],
+                row[EXCEL_ROW_COLUMN.get('default').get('Date')],
+                row[EXCEL_ROW_COLUMN.get('default').get('Time')],
+                row[EXCEL_ROW_COLUMN.get('default').get('Provider')]
+            )
+            ip_list.append(ip_tuple)
+            logging.info(f'IP_DST, Port_DST, Date, Time, Provider: {ip_tuple}')
+        workbook.close()
+        return ip_list
+        # except Exception as e:
+        #     print(999999)
+        #     logging.error(f'Error input .xlsx file:\n ({str(e)})')
+        #     return []
 
     def create_output_xlsx_file(self) -> None:
         try:

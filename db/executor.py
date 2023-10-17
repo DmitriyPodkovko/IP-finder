@@ -18,7 +18,7 @@ class DBExecutor:
         self._ip_tuple = None
         # logging.info(f'init DBExecutor')
 
-    async def connect_on(self) -> bool:
+    def connect_on(self) -> bool:
         try:
             self._cursor = connections['filter'].cursor()
             logging.info(f'CONNECT ON')
@@ -27,7 +27,7 @@ class DBExecutor:
             logging.error(f'DB error connect on:\n {str(e)}')
             return False
 
-    async def connect_off(self) -> None:
+    def connect_off(self) -> None:
         try:
             self._cursor.close()
             logging.info(f'CONNECT OFF')
@@ -40,6 +40,7 @@ class DBExecutor:
             self._ip_tuple = ip_tuple
             ip = self._ip_tuple[0]
             port = self._ip_tuple[1]
+
             # first_octet_ip = int(ip.split('.', 1)[0])
             first_two_ip_octets = '.'.join(ip.split('.')[:2])
             first_three_ip_octets = '.'.join(ip.split('.')[:3])
@@ -71,8 +72,8 @@ class DBExecutor:
             return {'380000000000'}
 
     def execute_check_numbers(self, numbers: set) -> set:
+        result = set()
         try:
-            result = set()
             for number in numbers:
                 oracle_func = ORACLE_FUNCTIONS.get('check_tel_func')
                 logging.info(f'{oracle_func}, {number}')
@@ -86,7 +87,7 @@ class DBExecutor:
             return result
         except Exception as e:
             logging.error(f'DB error execute:\n {str(e)}')
-            return result
+            return {}
 
 
 class CheckoutIP:
