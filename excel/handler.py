@@ -58,18 +58,19 @@ class ExcelHandler:
         except Exception as e:
             logging.error(f'Error creating .xlsx file:\n {self._xlsx_file} ({str(e)})')
 
-    def save_result_to_output_xlsx_file(self, dst_set: set) -> None:
+    def save_result_to_output_xlsx_file(self, dst_list: list) -> None:
         try:
             workbook = openpyxl.load_workbook(self._xlsx_output_file)
             sheet = workbook.active
-            current_column_idx = self._DST_column_idx
-            for i, value in enumerate(dst_set, start=self._current_row):
-                new_cell = sheet.cell(row=self._current_row, column=current_column_idx, value=value)
-                new_cell.style = self._cell_style
-                current_column_idx += 1
+            for dst_set in dst_list:
+                current_column_idx = self._DST_column_idx
+                for number in dst_set:
+                    new_cell = sheet.cell(row=self._current_row, column=current_column_idx, value=number)
+                    new_cell.style = self._cell_style
+                    current_column_idx += 1
+                self._current_row += 1
             workbook.save(self._xlsx_output_file)
             workbook.close()
-            self._current_row += 1
             logging.info(f'saved')
         except Exception as e:
             logging.error(f'Error saving .xlsx:\n {self._xlsx_file} ({str(e)})')

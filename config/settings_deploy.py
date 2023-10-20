@@ -103,6 +103,8 @@ DATABASES = {
 # Excel columns and rows settings for extracting values
 # Column numbering starts from 0
 # Row numbering starts from 1
+# If DST column < 0 then a new column called
+# config.settings.DESTINATION_NUMBER will be created
 EXCEL_ROW_COLUMN = {
     'default': {
         'Start_row': 2,
@@ -155,6 +157,8 @@ LIFE_IPS = ('37.73', '46.96', '88.154', '88.155')
 # Output params:
 # Excel result column name
 DESTINATION_NUMBER = 'DST number'
+# Quantity of rows per portion to save in xlsx output file
+ROWS_QUANTITY = 100
 RESULT_DIRECTORY = BASE_DIR / 'result'
 EXCEL_OUTPUT_FILE_PREFIX = '_result'
 

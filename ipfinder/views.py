@@ -10,7 +10,8 @@ from excel.handler import ExcelHandler
 from .forms import FileFieldForm
 from config.settings import (RESULT_DIRECTORY,
                              DEBUG, DATABASES,
-                             ALLOWED_HOSTS)
+                             ALLOWED_HOSTS,
+                             ROWS_QUANTITY)
 
 if not os.path.exists(RESULT_DIRECTORY):
     os.makedirs(RESULT_DIRECTORY)
@@ -48,6 +49,7 @@ class FileFieldFormView(FormView):
     def form_valid(self, form):
         global is_task_cancelled
         try:
+            current_rows_quantity = ROWS_QUANTITY
             files = form.cleaned_data["file_field"]
             # logging.info(f'{self.request.META}')
             logging.info(files)
@@ -61,19 +63,26 @@ class FileFieldFormView(FormView):
                 excel_handler.create_output_xlsx_file()
                 db_executor = DBExecutor()
                 if db_executor.connect_on():
-                    for i in ip_list:
-                        if is_task_cancelled:
-                            logging.info("TASK CANCELLED !!!")
-                            break
-                        DST_numbers = db_executor.execute(i)
-                        logging.info(f'response: {DST_numbers}')
-                        if DST_numbers:
-                            warning_numbers = db_executor.execute_check_numbers(DST_numbers)
-                            if warning_numbers:
-                                FileFieldFormView.all_warning_numbers |= warning_numbers
-                                logging.info(f'!!! WARNING NUMBERS: {warning_numbers} !!!')
-                        excel_handler.save_result_to_output_xlsx_file(DST_numbers)
-                    db_executor.connect_off()
+                    try:
+                        DST_numbers_ls = []
+                        for i, tuple_values in enumerate(ip_list):
+                            if is_task_cancelled:
+                                logging.info("TASK CANCELLED !!!")
+                                break
+                            DST_numbers = db_executor.execute(tuple_values)
+                            logging.info(f'response: {DST_numbers}')
+                            DST_numbers_ls.append(DST_numbers)
+                            if DST_numbers:
+                                warning_numbers = db_executor.execute_check_numbers(DST_numbers)
+                                if warning_numbers:
+                                    FileFieldFormView.all_warning_numbers |= warning_numbers
+                                    logging.info(f'!!! WARNING NUMBERS: {warning_numbers} !!!')
+                            if i + 1 == current_rows_quantity or i + 1 == len(ip_list):
+                                excel_handler.save_result_to_output_xlsx_file(DST_numbers_ls)
+                                DST_numbers_ls = []
+                                current_rows_quantity += ROWS_QUANTITY
+                    finally:
+                        db_executor.connect_off()
         finally:
             is_task_cancelled = False
         return super().form_valid(form)
