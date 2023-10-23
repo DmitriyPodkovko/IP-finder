@@ -13,11 +13,18 @@ from config.settings import (RESULT_DIRECTORY,
                              ALLOWED_HOSTS,
                              ROWS_QUANTITY)
 
+
+def create_log_file():
+    if not os.path.exists(f'{RESULT_DIRECTORY}/ipfinder.log'):
+        logging.basicConfig(filename=f'{RESULT_DIRECTORY}/ipfinder.log',
+                            level=logging.INFO,
+                            format='%(asctime)s - %(levelname)s - %(message)s',
+                            force=True)
+
+
 if not os.path.exists(RESULT_DIRECTORY):
     os.makedirs(RESULT_DIRECTORY)
-logging.basicConfig(filename=f'{RESULT_DIRECTORY}/ipfinder.log',
-                    level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+create_log_file()
 logging.info(f'DEBUG = {DEBUG}')
 # logging.info(f'STATICFILES_DIRS = {STATICFILES_DIRS}')
 # logging.info(f'STATIC_ROOT = {STATIC_ROOT}')
@@ -49,6 +56,7 @@ class FileFieldFormView(FormView):
     def form_valid(self, form):
         global is_task_cancelled
         try:
+            create_log_file()
             current_rows_quantity = ROWS_QUANTITY
             files = form.cleaned_data["file_field"]
             # logging.info(f'{self.request.META}')
@@ -83,6 +91,7 @@ class FileFieldFormView(FormView):
                                 current_rows_quantity += ROWS_QUANTITY
                     finally:
                         db_executor.connect_off()
+
         finally:
             is_task_cancelled = False
         return super().form_valid(form)
