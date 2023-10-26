@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edit Settings</title>
+    {% load static %}
+    <link href="{% static 'index.css' %}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="wrapper">
+        <header>Edit application settings:</header>
+        <form method="post" enctype="multipart/form-data" id="settings-form">
+            {% csrf_token %}
+            <textarea name="settings_text" rows="11" cols="50" style="border: none">{{ current_settings_text }}</textarea>
+        </form>
+        <div class="button" id="save">
+            <div class="content">
+                <span class="button-text">Save</span>
+            </div>
+        </div>
+        <div class="button" id="cancel" data-original-settings="{{ current_settings_text }}">
+            <div class="content">
+                <span class="button-text" id="cancel-text">Cancel</span>
+            </div>
+        </div>
+        <div class="button" id="close">
+            <div class="content">
+                <span class="button-text" id="close-text">Close</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        document.getElementById('save').addEventListener('click', function () {
+            var settingsText = document.querySelector('textarea[name="settings_text"]').value;
+
+            // Sending new settings to the server
+            fetch('/edit_settings/', {
+                method: 'POST',
+                body: new FormData(document.getElementById('settings-form')),
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(function (response) {
+                if (response.ok) {
+                    alert('Settings saved successfully.');
+                } else {
+                    alert('Failed to save settings.');
+                }
+            });
+        });
+
+        function getCookie(name) {
+            var value = "; " + document.cookie;
+            var parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+
+        document.getElementById('cancel').addEventListener('click', function () {
+            // Restore original settings
+            var originalSettingsText = this.getAttribute('data-original-settings');
+        document.querySelector('textarea[name="settings_text"]').value = originalSettingsText;
+        });
+
+        document.getElementById('close').addEventListener('click', function () {
+            window.close();
+        });
+
+    </script>
+</body>
+</html>

@@ -2,11 +2,10 @@ import logging
 import cx_Oracle
 from django.db import connections
 from datetime import datetime
-from config.settings import (ORACLE_FUNCTIONS,
-                             OPERATORS,
-                             MOB3_IPS, MTS_IPS,
-                             KS_IPS, LIFE_IPS)
-
+from config.handler_settings import (ORACLE_FUNCTIONS,
+                                     OPERATORS,
+                                     MOB3_IPS, MTS_IPS,
+                                     KS_IPS, LIFE_IPS)
 
 # for development
 # cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
@@ -16,7 +15,6 @@ class DBExecutor:
     def __init__(self) -> None:
         self._cursor = None
         self._ip_tuple = None
-        # logging.info(f'init DBExecutor')
 
     def connect_on(self) -> bool:
         try:
@@ -68,7 +66,7 @@ class DBExecutor:
             return result
         except Exception as e:
             logging.error(f'DB error execute:\n {str(e)}')
-            return {'380000000000'}
+            return {'ERROR'}
 
     def execute_check_numbers(self, numbers: set) -> set:
         try:
@@ -90,7 +88,6 @@ class DBExecutor:
 
 
 class CheckoutIP:
-
     def __init__(self, first_two_ip_octets, first_three_ip_octets, operator):
         self._first_two_ip_octets = first_two_ip_octets
         self._first_three_ip_octets = first_three_ip_octets

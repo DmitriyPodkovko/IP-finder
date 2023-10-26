@@ -3,10 +3,10 @@ from typing import List, Tuple, Any
 import openpyxl
 import logging
 from openpyxl.styles import NamedStyle
-from config.settings import (EXCEL_ROW_COLUMN,
-                             DESTINATION_NUMBER,
-                             EXCEL_OUTPUT_FILE_PREFIX,
-                             RESULT_DIRECTORY)
+from config.handler_settings import (EXCEL_ROW_COLUMN,
+                                     DESTINATION_NUMBER,
+                                     EXCEL_OUTPUT_FILE_PREFIX,
+                                     RESULT_DIRECTORY)
 
 
 class ExcelHandler:

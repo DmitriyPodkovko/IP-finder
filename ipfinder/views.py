@@ -1,5 +1,6 @@
 import os
 import logging
+from django.shortcuts import render
 from django.http import JsonResponse
 from django.views import View
 from django.views.generic.edit import FormView
@@ -8,10 +9,11 @@ from django.urls import reverse_lazy
 from db.executor import DBExecutor
 from excel.handler import ExcelHandler
 from .forms import FileFieldForm
-from config.settings import (RESULT_DIRECTORY,
-                             DEBUG, DATABASES,
-                             ALLOWED_HOSTS,
-                             ROWS_QUANTITY)
+from config.settings import (DEBUG, DATABASES,
+                             ALLOWED_HOSTS)
+from config.handler_settings import (RESULT_DIRECTORY,
+                                     ROWS_QUANTITY,
+                                     SETTINGS_FILE_PATH)
 
 
 def create_log_file():
@@ -26,16 +28,13 @@ if not os.path.exists(RESULT_DIRECTORY):
     os.makedirs(RESULT_DIRECTORY)
 create_log_file()
 logging.info(f'DEBUG = {DEBUG}')
+# logging.info(f'SETTINGS_FILE_PATH = {SETTINGS_FILE_PATH}')
 # logging.info(f'STATICFILES_DIRS = {STATICFILES_DIRS}')
 # logging.info(f'STATIC_ROOT = {STATIC_ROOT}')
 logging.info(f"DATABASES = {DATABASES.get('filter')}")
 # logging.info(f'STATIC_URL = {STATIC_URL}')
 logging.info(f'ALLOWED_HOSTS = {ALLOWED_HOSTS}')
 is_task_cancelled = False
-
-# def index(request):
-#     print('qwerty')
-#     return render(request, 'index.html')
 
 
 class FileFieldFormView(FormView):
@@ -138,3 +137,16 @@ def delete_file(request):
         return JsonResponse(response_data)
     # If the request method is not POST, we will return an error
     return JsonResponse({'success': False})
+
+
+def edit_settings(request):
+    if request.method == 'POST':
+        new_settings_text = request.POST.get('settings_text', '')
+        # Saving new settings in a settings file
+        with open(SETTINGS_FILE_PATH, 'w') as file:
+            file.write(new_settings_text)
+        return JsonResponse({'status': 'success'})
+    # Display current settings
+    with open(SETTINGS_FILE_PATH, 'r') as file:
+        current_settings_text = file.read()
+    return render(request, 'edit_settings.html', {'current_settings_text': current_settings_text})
