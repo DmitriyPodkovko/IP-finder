@@ -78,8 +78,14 @@ class FileFieldFormView(FormView):
                                 break
                             DST_numbers = db_executor.execute(tuple_values)
                             logging.info(f'response: {DST_numbers}')
+                            # if response is error then repeat request 5 time
+                            if DST_numbers and next(iter(DST_numbers)) == 'ERROR':
+                                for j in range(5):
+                                    DST_numbers = db_executor.execute(tuple_values)
+                                    if DST_numbers and next(iter(DST_numbers)) != 'ERROR':
+                                        break
                             DST_numbers_ls.append(DST_numbers)
-                            if DST_numbers:
+                            if DST_numbers and next(iter(DST_numbers)) != 'ERROR':
                                 warning_numbers = db_executor.execute_check_numbers(DST_numbers)
                                 if warning_numbers:
                                     FileFieldFormView.all_warning_numbers |= warning_numbers
