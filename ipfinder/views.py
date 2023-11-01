@@ -35,6 +35,10 @@ logging.info(f"DATABASES = {DATABASES.get('filter')}")
 # logging.info(f'STATIC_URL = {STATIC_URL}')
 logging.info(f'ALLOWED_HOSTS = {ALLOWED_HOSTS}')
 is_task_cancelled = False
+# total_files = 0  # Общее количество файлов, которые нужно обработать.
+# processed_files = 0  # Количество уже обработанных файлов.
+processed_rows: int = 0
+total_xlsx_rows: int = 0
 
 
 class FileFieldFormView(FormView):
@@ -54,11 +58,13 @@ class FileFieldFormView(FormView):
 
     def form_valid(self, form):
         global is_task_cancelled
+        global processed_rows, total_xlsx_rows
         try:
             create_log_file()
             current_rows_quantity = ROWS_QUANTITY
             files = form.cleaned_data["file_field"]
             # logging.info(f'{self.request.META}')
+            total_files = len(files)  # Установите общее количество файлов.
             logging.info(files)
             for f in files:  # Do with each file.
                 logging.info(f'GET: {f}')
@@ -67,11 +73,14 @@ class FileFieldFormView(FormView):
                     break
                 excel_handler = ExcelHandler(f)
                 ip_list = excel_handler.get_ip_list_from_xlsx_file()
+                total_xlsx_rows = len(ip_list)
+                logging.info(f'total_xlsx_rows   {total_xlsx_rows}')
                 excel_handler.create_output_xlsx_file()
                 db_executor = DBExecutor()
                 if db_executor.connect_on():
                     try:
                         DST_numbers_ls = []
+                        processed_rows = 0
                         for i, tuple_values in enumerate(ip_list):
                             if is_task_cancelled:
                                 logging.info("TASK CANCELLED !!!")
@@ -94,9 +103,10 @@ class FileFieldFormView(FormView):
                                 excel_handler.save_result_to_output_xlsx_file(DST_numbers_ls)
                                 DST_numbers_ls = []
                                 current_rows_quantity += ROWS_QUANTITY
+                            processed_rows += 1
                     finally:
                         db_executor.connect_off()
-
+            # processed_files += 1
         finally:
             is_task_cancelled = False
         return super().form_valid(form)
@@ -156,3 +166,23 @@ def edit_settings(request):
     with open(SETTINGS_FILE_PATH, 'r') as file:
         current_settings_text = file.read()
     return render(request, 'edit_settings.html', {'current_settings_text': current_settings_text})
+
+
+def check_processing_status(request):
+    # Рассчитайте процент выполнения на основе processed_files и total_files.
+    # if total_files == 0:
+    #     progress_percent = 0
+    #
+    # else:
+    #     progress_percent = (processed_files / total_files) * 100
+
+    if total_xlsx_rows == 0:
+        progress_percent = 0
+    else:
+        progress_percent = round((processed_rows / total_xlsx_rows) * 100)
+    data = {
+        'progress': progress_percent,  # Прогресс выполнения в процентах.
+    }
+    logging.info(f'{data}')
+
+    return JsonResponse(data)

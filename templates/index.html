@@ -26,8 +26,12 @@
             </i>
             <p>Browse File to Upload</p>
         </form>
-       
+
         <section id="fileList" class="uploaded-area  sortable-list"></section>
+
+        <div id="processing-status">
+<progress id="progress-bar" max="100" value="0"></progress>
+</div>
 
         <div class="button" id="upload">
             <div class="content">
@@ -201,5 +205,31 @@ window.onload = () => {
         alert(warningNumbersText);
     }
 };
+
+function updateProcessingStatus() {
+    fetch('/check_processing_status/')  // URL для проверки состояния.
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('processing-status').innerHTML = data.progress;
+
+            // Обновление прогресс-бара.
+            if (data.progress !== undefined) {
+                const progressBar = document.getElementById('progress-bar');
+                progressBar.value = data.progress;
+            }
+
+            // setTimeout(updateProcessingStatus, 10);
+            if (data.progress !== 100) {
+                setTimeout(updateProcessingStatus, 10);  // Обновляем каждую секунду. 1000
+            }
+        });
+}
+
+
+// Начните обновление информации о состоянии выполнения цикла.
+// updateProcessingStatus();
+
+// Начните обновление информации о состоянии выполнения цикла каждую секунду.
+setInterval(updateProcessingStatus, 1000);  // Обновляем каждую секунду.
 
 </script>
