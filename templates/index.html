@@ -7,14 +7,16 @@
     <title>IP-finder</title>
     {% load static %}
     <link href="{% static 'index.css' %}" rel="stylesheet">
-
+<!--    <link href="{% static 'jquery.min.js' %}">-->
+    <script src="{% static 'node_modules/jquery/dist/jquery.min.js' %}"></script>
+    <script src="https://code.jquery.com/jquery.min.js"></script>
 </head>
 
 <body>
     <div class="wrapper">
         <a href="{% url 'result' %}" target="_blank">RESULTS</a>
         <header>IP-FINDER</header>
-        <form id="handler" method="POST" enctype="multipart/form-data">
+        <form id="handler" method="POST" enctype="multipart/form-data" class="mainClick">
             {% csrf_token %}
             <input type="file" name="file_field" class="file-input" id="fileInputed" accept=".xlsx" hidden multiple />
             <i class="fas fa-cloud-upload-alt">
@@ -27,11 +29,7 @@
             <p>Browse File to Upload</p>
         </form>
 
-        <section id="fileList" class="uploaded-area  sortable-list"></section>
-
-        <div id="processing-status">
-<progress id="progress-bar" max="100" value="0"></progress>
-</div>
+        <section id="fileList" class="progress-area sortable-list"></section>
 
         <div class="button" id="upload">
             <div class="content">
@@ -69,42 +67,39 @@
 </html>
 
 <script>
+    let progressItem = [];
     const form = document.querySelector("form"),
         fileInput = form.querySelector(".file-input");
-    // uploadedArea = document.querySelector(".uploaded-area");
+
     const upload = document.getElementById("upload");
-            upload.addEventListener("click", () => {
-                let file_to_send = [];
-                const uniq_file = document.getElementsByClassName('uniq-file');
-                if(uniq_file){
-                    for(let i = 0; i < uniq_file.length; i++){
-                        file_to_send.push(uniq_file[i].getAttribute('data-name'));
-                    }
-                    // uniq_file.forEach(file => {
-                    //     file_to_send.push(file.getAttribute('data-name'));
-                    // })
-                }
-                console.log(file_to_send);
-            })
+    upload.addEventListener("click", () => {
+        let file_to_send = [];
+        const uniq_file = document.getElementsByClassName('uniq-file');
+        if (uniq_file) {
+            for (let i = 0; i < uniq_file.length; i++) {
+                file_to_send.push(uniq_file[i].getAttribute('data-name'));
+            }
+        }
+        console.log(file_to_send);
+    })
     form.addEventListener("click", () => {
         fileInput.click();
     })
 
     let fileInputed = document.getElementById('fileInputed');
     let fileList = document.getElementById('fileList');
-    
+
     fileInputed.addEventListener('change', function () {
         let files = fileInputed.files;
-        
+        let count = $('.item').length;
         for (let i = 0; i < files.length; i++) {
             let file = files[i];
             let fileName = file.name;
             let fileSize = file.size;
-            //let liElement = document.createElement('div');
-           
+            progressItem[count + i] = 0;
 
             const data = `
-  <li class="row item uniq-file" draggable="true" data-name="${fileName}">
+  <li  class="row item uniq-file" draggable="true" data-name="${fileName}">
     <i class="fas fa-file-alt">
       <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
           class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
@@ -115,46 +110,62 @@
     <div class="content">
       <div class="details">
         <div class="name">
-          <span>${fileName} - Uploaded</span>
+          <span class="size">${fileName} </span>- 
+          <span  class="size">${fileSize} KB</span>
+       
+          <div class="progress-container">
+          <div class="progress-add">
+        <span class="font-status"></span>
+          <span class="persent"></span>
+          
         </div>
-        <div class="size">
-          <span>${fileSize} KB</span>
+        
+        <div class="progress-bar">
+    <div class="progress" >
+    </div> 
         </div>
+        </div>
+        </div>
+        
       </div>
-      <i class="fas fa-check">
-        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
-            class="bi bi-check" viewBox="0 0 16 16">
-            <path
-                d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z" />
-        </svg>
-      </i>
-    </div>
+    <section class="pause-proc">
+    </section>
+      <div class="play-proc">
+<!--      hide play, pause, stop, ... buttons -->
+<!--            <i class="bi bi-play-fill">-->
+<!--                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">-->
+<!--                <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>-->
+<!--            </svg></i>-->
+        </div>
+<!--        hide play, pause, stop, ... buttons-->
+<!--        <div class="download"></div>-->
+<!--        <div>-->
+<!--                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-delete" viewBox="0 0 16 16">-->
+<!--               <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>-->
+<!--                </svg></i>-->
+<!--                </div>-->
+                       
     </li>
   `;
 
-            fileList.insertAdjacentHTML('beforeend',data);
+            fileList.insertAdjacentHTML('beforeend', data);
 
             const sortableList = document.querySelector(".sortable-list");
             const items = sortableList.querySelectorAll(".item");
 
-            /* document.addEventListener("dragstart", (event)=>{
-                 event.target.classList.toggle("dragging");
-                 //console.log(event)
-             })*/
             items.forEach(item => {
                 item.addEventListener("dragstart", () => {
                     setTimeout(() => item.classList.add("dragging"), 0);
                 });
                 item.addEventListener("dragend", () => item.classList.remove("dragging"));
             });
-              
+
             const initSortableList = (e) => {
 
                 e.preventDefault();
                 const draggingItem = document.querySelector(".dragging");
                 const siblings = [...sortableList.querySelectorAll(".item:not(.dragging)")];
                 let nextSibling = siblings.find(siblings => {
-                    //console.log(sortableList.children);  - for sort array
                     return e.clientY <= siblings.offsetTop + siblings.offsetHeight / 2;
 
                 });
@@ -162,9 +173,9 @@
             }
             sortableList.addEventListener("dragover", initSortableList)
             sortableList.addEventListener("dragenter", e => e.preventDefault())
-          
         }
-        })
+    })
+
 
 const uploadSpan = document.getElementById("uploadSpan");
 
@@ -206,30 +217,132 @@ window.onload = () => {
     }
 };
 
-function updateProcessingStatus() {
-    fetch('/check_processing_status/')  // URL для проверки состояния.
+
+    let newSVG = '';
+    let content = '';
+    let button = `
+                <div>
+                <i> <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+</svg>
+</i>
+</div>
+`;
+
+    $(document).on("click", ".play-proc", function (event) {
+
+
+        let buttonIndex = $(".play-proc").index(this);
+
+
+        if ($(".play-proc").eq(buttonIndex).attr("stop")) { //add pause class
+            newSVG = `
+        <i class="bi bi-play-fill">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
+                <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+            </svg></i>`;
+            content = `Uploaded`;
+
+            $(".play-proc").eq(buttonIndex).removeAttr("stop");
+            $(".font-status").eq(buttonIndex).html(content);
+            $(".download").eq(buttonIndex).html(button);
+            clearInterval(progressData[buttonIndex])
+
+
+        } else {  //add play class
+            newSVG = `<div class="pause">
+            <i class="bi bi-pause"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
+                         <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/>
+                     </svg></i>
+</div>`;
+            content = `Uploading`;
+            $(".progress-container").eq(buttonIndex).css("opacity", 1);
+            //  $(".progress-container").eq(buttonIndex).css("opacity", 0);
+            $(".play-proc").eq(buttonIndex).attr("stop", true);
+            $("download").eq(buttonIndex).removeClass("bi-x-lg");
+            $(".download").eq(buttonIndex).html(button);
+            checkProgress(buttonIndex);
+        }
+
+        $(".play-proc").eq(buttonIndex).html(newSVG);
+        $(".font-status").eq(buttonIndex).html(content);
+    });
+
+    $(document).on("click", ".button", function (event) { //add all files to uploading
+        let newSVG = '';
+        let buttonIndex = $(".play-proc").index(this);
+//         hide play, pause, stop, ... buttons
+//         newSVG = `<i class="bi bi-pause"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-pause" viewBox="0 0 16 16">
+//                          <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/>
+//                      </svg></i>
+//
+//                     </i>
+// `;
+        content = `Uploading`;
+        $(".progress-container").css("opacity", 1);
+        $(".play-proc").attr("stop", true);
+        $(".play-proc").html(newSVG);
+        $(".font-status").html(content);
+        for (let i = 0; i < $(".play-proc").length; i++) {
+            checkProgress(i)
+        }
+    });
+
+    $(document).on("click", ".bi-delete", function (event) { //deleting file
+        let buttonIndex = $(".bi-delete").index(this);
+        $(".row").eq(buttonIndex).remove();
+        clearInterval(progressData[buttonIndex]);
+        progressData.splice(buttonIndex, 1);
+        progressItem.splice(buttonIndex, 1);
+    });
+
+    $(document).on("click", ".bi-download", function (event) { //downloading 
+        let buttonIndex = $(".bi-download").index(this);
+        alert('are you sure that downloading the file?');
+    });
+
+    $(document).on("click", ".play-proc", function (event) {
+        let buttonIndex = $(".play-proc").index(this);
+    });
+
+    let progressData = [];
+
+    function checkProgress(buttonIndex) {
+        let interval = setInterval(() => {
+            if ($(".progress").eq(buttonIndex) && progressItem[buttonIndex] < 100) {
+                if ($(".progress").eq(buttonIndex).attr('stop')) {
+                    alert("have questio")
+                } else {
+                    updateProcessingStatus(function(progress_, file_index_) {
+                        if (progress_ !== undefined && !isNaN(file_index_)) {
+                            buttonIndex = file_index_
+                            progressItem[buttonIndex] = progress_;
+                            $(".progress").eq(buttonIndex).css("width", progressItem[buttonIndex] + "%");
+                            $(".persent").eq(buttonIndex).text(progressItem[buttonIndex] + "%");
+                        }
+                    });
+                }
+            } else {
+                $(".play-proc").eq(buttonIndex).css("display", "none");
+
+                if (progressData[buttonIndex]) {
+                    clearInterval(progressData[buttonIndex])
+                }
+            }
+        }, 100);
+        progressData[buttonIndex] = interval
+    }
+
+function updateProcessingStatus(callback) {
+    fetch('/check_processing_status/')
         .then(response => response.json())
         .then(data => {
-            document.getElementById('processing-status').innerHTML = data.progress;
-
-            // Обновление прогресс-бара.
-            if (data.progress !== undefined) {
-                const progressBar = document.getElementById('progress-bar');
-                progressBar.value = data.progress;
-            }
-
-            // setTimeout(updateProcessingStatus, 10);
-            if (data.progress !== 100) {
-                setTimeout(updateProcessingStatus, 10);  // Обновляем каждую секунду. 1000
-            }
+            const progress = data.progress;
+            const file_index = data.file_index;
+            callback(progress, file_index);
         });
 }
 
-
-// Начните обновление информации о состоянии выполнения цикла.
-// updateProcessingStatus();
-
-// Начните обновление информации о состоянии выполнения цикла каждую секунду.
-setInterval(updateProcessingStatus, 1000);  // Обновляем каждую секунду.
 
 </script>

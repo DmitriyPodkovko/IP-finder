@@ -1,66 +1,65 @@
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Poppins",sans-serif;
+    font-family: "Poppins", sans-serif;
 }
 
-body{
+body {
     display: flex;
-    align-items:center;
+    align-items: center;
     justify-content: center;
     min-height: 100vh;
     background: #6990f2;
-    -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE10+/Edge */
-  user-select: none;
 }
-.wrapper{
+
+.wrapper {
     width: 430px;
     padding: 30px;
-    background:#fff;
-    border-radius:5px;
+    background: #fff;
+    border-radius: 5px;
 }
-.wrapper header{
-    color:#6990f2;
-    font-size:27px;
+
+.wrapper header {
+    color: #6990f2;
+    font-size: 27px;
     font-weight: 600;
     text-align: center;
 }
-.wrapper form{
+
+.wrapper form {
     height: 167px;
     display: flex;
-    align-items:center;
-    border-radius:5px;
+    align-items: center;
+    border-radius: 5px;
     cursor: pointer;
     border: 2px dashed #6990f2;
     justify-content: center;
     flex-direction: column;
-    margin:30px 0;
+    margin: 30px 0;    
 }
 
-form :where(i,p){
+form :where(i, p) {
     color: #6990f2;
 }
 
 form i {
-    font-size: 50px; 
+    font-size: 50px;
 }
 
-form p{
-    font-size: 16px; 
+form p {
+    font-size: 16px;
     margin-top: 15px;
 }
 
-section .row{
-    background:#e9f0ff;
+section .row {
+    background: #e9f0ff;
     margin-bottom: 10px;
-    list-style:none;
-    padding: 15px 20px;
-    border-radius:5px;
+    list-style: none;
+    padding: 13px 20px;
+    border-radius: 5px;
     display: flex;
-    align-items:center;
+    align-items: center;
     flex-direction: row;
     justify-content: ;
 }
@@ -71,116 +70,232 @@ section .row i svg {
 }
 
 section .details span {
-    font-size:14px;
+    font-size: 13px;
+
 }
 
-.progress-area .row .content{
-    width:100%;
+.progress-area .row .content {
+    width: 100%;
     margin-left: 15px;
 }
 
-.progress-area .details{
+.progress-area .details {
     display: flex;
-    align-items:center;
+    width: 100%;
     margin-bottom: 7px;
     justify-content: space-between;
 }
 
-.uploaded-area .row .content{
+.progress-area .row .content {
     width: 100%;
-display: flex;
-align-items:center;
-justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
-.uploaded-area .row .details{
+
+.progress-area .row .details {
     display: flex;
     flex-direction: column;
     margin-left: 15px;
 }
 
-.uploaded-area .details .size{
-    font-size: 11px;
+.progress-area .details .size {
+    font-size: 12px;
     color: #404040;
 }
 
-.uploaded-area .fa-check{
+.progress-area .fa-check {
     font-size: 16px;
     color: #6990f2;
 }
 
-.uploaded-area{
+.progress-area {
     max-height: 430px;
     overflow-y: scroll;
     scrollbar-width: none;
 }
 
-.uploaded-area::-webkit-scrollbar{
+.progress-area::-webkit-scrollbar {
     width: 0px;
 }
 
+.progress-bar {
+    margin-top: 1px;
+}
 
-.progress-area .progress-bar{
+.progress-area .progress-bar {
     height: 6px;
     width: 100%;
     background: #fff;
     margin-bottom: 4px;
-    border-radius:30px;
+    border-radius: 30px;
 }
 
-.progress-bar .progress{
+.progress-bar .progress {
     height: 100%;
     width: 50%;
     background: #6990f2;
     border-radius: inherit;
 }
-.item.dragging{
+
+.item.dragging {
     opacity: 0.6;
 }
 
-.item.dragging :where(.details, i){
+.item.dragging :where(.details, i) {
     opacity: 0;
 }
 
 
-.button{
+.button {
     height: 40px;
-    width:160px;
-    background:#6990f2;
-    border-radius:55px;
-    cursor:pointer;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    width: 160px;
+    background: #6990f2;
+    border-radius: 55px;
+    cursor: pointer;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
     transition: all 6s easy-in-out;
     margin-left: auto;
     margin-right: auto;
     margin-top: 10px;
 }
+
 @keyframes layer {
-    100%{
-        left:0%;
+    100% {
+        left: 0%;
     }
 }
-.button .content{
-    height:100%;
+
+.button .content {
+    height: 100%;
     width: 100%;
     display: flex;
-    align-items:center;
+    align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    transition-delay:0.2s;
+    transition-delay: 0.2s;
 }
 
 .button .content i svg,
-.button .content .button-text{
-    color:#fff;
+.button .content .button-text {
+    color: #fff;
     font-size: 10px;
     font-weight: 150px;
 }
-.button .content .button-text{
+
+.button .content .button-text {
     font-size: 16px;
     font-weight: 150;
-    margin-left:8px
+    margin-left: 8px
 }
-.button .content i svg{
+
+.button .content i svg {
     display: flex;
+    align-items: center;
+}
+
+.progress-area .row .content {
+    width: 100%;
+    margin-left: 8px;
+    margin-right: 5px;
+}
+
+.progress-area .details {
+    display: flex;
+    margin-bottom: 7px;
+    margin-right: 7px;
+    justify-content: space-between;
+}
+
+.progress-area .content .progress-bar {
+    height: 6px;
+    width: 100%;
+    margin-bottom: 4px;
+    background: #fff;
+    border-radius: 30px;
+}
+
+.content .progress-bar .progress {
+    height: 100%;
+    width: 0%;
+    background: #6990F2;
+    border-radius: inherit;
+}
+
+.font-status {
+    color: #404040;
+}
+
+.play-proc {
+    cursor: pointer;
+}
+
+.progress-container {
+    opacity: 0;
+}
+
+.bi-three-dots-vertical{
+    cursor: pointer;
+}
+
+.downmenu {
+    position: absolute;
+    width: 200px;
+    height: 70px;
+    transition: .2s;
+    z-index: 1;
+    background-color: #fff;
+    text-align:center; 
+    font-size:16px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+.text-menu{
+    position: flex;
     align-items:center;
+    padding: 20px;
+}
+
+.bi-delete:hover{
+    background-color:#d10808;
+    text-decoration:none;
+    cursor: pointer;
+    padding: 3px;
+    margin-left:3px;
+    border-radius:5px;
+    color: #fff;
+    width:23px;
+    height: 23px;
+}
+
+.play-proc {
+    width: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    }
+
+.download{
+    display: flex;
+    justify-content: space-between;
+    align-items:center; 
+    flex-direction: row;
+}
+.bi{
+    color:#6990f2;
+}
+.bi-download{
+    width: 24px;
+    height:24px;
+}
+.bi-download:hover{
+    background-color: #3265e6;
+    padding: 3px;
+    border-radius:5px;
+    color: #fff;
+    cursor: pointer;
+    width: 24px;
+    height:24px;
+}
+.bi-delete{
+    margin-left:3px;
 }
