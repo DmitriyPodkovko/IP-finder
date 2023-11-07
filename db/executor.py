@@ -8,7 +8,7 @@ from config.handler_settings import (ORACLE_FUNCTIONS,
                                      KS_IPS, LIFE_IPS)
 
 # for development
-cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
+# cx_Oracle.init_oracle_client(lib_dir="/Users/dmitriypodkovko/Downloads/instantclient_19_8")
 
 
 class DBExecutor:
