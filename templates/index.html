@@ -7,9 +7,10 @@
     <title>IP-finder</title>
     {% load static %}
     <link href="{% static 'index.css' %}" rel="stylesheet">
-<!--    <link href="{% static 'jquery.min.js' %}">-->
-    <script src="{% static 'node_modules/jquery/dist/jquery.min.js' %}"></script>
-    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="{% static 'node_modules/jquery/dist/jquery.js' %}"></script>
+<!--    jQuery don't work stably with jquery.min.js locally-->
+<!--    <script src="{% static 'node_modules/jquery/dist/jquery.min.js' %}"></script>-->
+<!--    <script src="https://code.jquery.com/jquery.min.js"></script>-->
 </head>
 
 <body>
@@ -344,5 +345,15 @@ function updateProcessingStatus(callback) {
         });
 }
 
-
 </script>
+
+<!--Check jQuery-->
+<!--<script type="text/javascript">-->
+<!--    window.onload = function() {-->
+<!--       if (window.jQuery) {-->
+<!--          alert('jQuery is loaded');-->
+<!--       } else {-->
+<!--          alert('jQuery is not loaded');-->
+<!--       }-->
+<!--    }-->
+<!--</script>-->
