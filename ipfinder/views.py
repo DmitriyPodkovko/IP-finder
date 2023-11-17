@@ -1,6 +1,8 @@
 import os
 import logging
-from django.shortcuts import render
+from functools import wraps
+from django.utils.decorators import method_decorator
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views import View
 from django.views.generic.edit import FormView
@@ -8,7 +10,7 @@ from django.views.generic import TemplateView
 from django.urls import reverse_lazy
 from db.executor import DBExecutor
 from excel.handler import ExcelHandler
-from .forms import FileFieldForm
+from .forms import FileFieldForm, LoginForm
 from config.settings import (DEBUG, DATABASES,
                              ALLOWED_HOSTS)
 from config.handler_settings import (RESULT_DIRECTORY,
@@ -37,14 +39,33 @@ logging.info(f'ALLOWED_HOSTS = {ALLOWED_HOSTS}')
 is_task_cancelled = False
 processed_rows: int = 0
 total_xlsx_rows: int = 0
-current_file_index: None
+current_file_index: int = 0
 next_file_index: bool = False
+authenticated: bool = False
 
 
+def custom_login_required(login_url=None):
+    """
+    Decorator for requiring user authentication.
+    :param login_url: URL to redirect in case of no authentication
+    """
+
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapped_view(*args, **kwargs):
+            # if not request.user.is_authenticated:
+            if not authenticated:
+                return redirect(login_url)
+            return view_func(*args, **kwargs)
+        return wrapped_view
+    return decorator
+
+
+# @method_decorator(login_required(login_url='login'), name='dispatch')
+@method_decorator(custom_login_required(login_url='login'), name='dispatch')
 class FileFieldFormView(FormView):
     form_class = FileFieldForm
     template_name = 'index.html'
-    # success_url = reverse_lazy('loaded')
     success_url = reverse_lazy('index')
     all_warning_numbers = set()
 
@@ -108,7 +129,7 @@ class FileFieldFormView(FormView):
                         processed_rows = 0
                         db_executor.connect_off()
         finally:
-            current_file_index = None
+            current_file_index = 0
             next_file_index = False
             is_task_cancelled = False
         return super().form_valid(form)
@@ -120,10 +141,18 @@ class FileFieldFormView(FormView):
             FileFieldFormView.all_warning_numbers = set()
         return context
 
+    # @method_decorator(custom_login_required(login_url='login'))
+    # def dispatch(self, *args, **kwargs):
+    #     if not self.request.session.get('is_authenticated', False):
+    #     if not is_authenticated:
+    #         return HttpResponseRedirect('login')
+    #     return super().dispatch(*args, **kwargs)
+
 
 # class FileLoadedView(TemplateView):
 #     template_name = 'loaded.html'
 
+@method_decorator(custom_login_required(login_url='login'), name='dispatch')
 class FileResultView(TemplateView):
     template_name = 'result.html'
 
@@ -133,6 +162,7 @@ class FileResultView(TemplateView):
         return context
 
 
+@method_decorator(custom_login_required(login_url='login'), name='dispatch')
 class CancelTaskView(View):
     def post(self, request, *args, **kwargs):
         global is_task_cancelled
@@ -141,6 +171,7 @@ class CancelTaskView(View):
         return JsonResponse({"status": "cancelled"})
 
 
+@custom_login_required(login_url='login')
 def delete_file(request):
     if request.method == 'POST':
         # Get the file name from the POST request
@@ -157,6 +188,7 @@ def delete_file(request):
     return JsonResponse({'success': False})
 
 
+@custom_login_required(login_url='login')
 def edit_settings(request):
     if request.method == 'POST':
         new_settings_text = request.POST.get('settings_text', '')
@@ -167,7 +199,8 @@ def edit_settings(request):
     # Display current settings
     with open(SETTINGS_FILE_PATH, 'r') as file:
         current_settings_text = file.read()
-    return render(request, 'edit_settings.html', {'current_settings_text': current_settings_text})
+    return render(request, 'edit_settings.html',
+                  {'current_settings_text': current_settings_text})
 
 
 def check_processing_status(request):
@@ -183,3 +216,32 @@ def check_processing_status(request):
         next_file_index = False
     return JsonResponse({'progress': progress_percent,
                          'file_index': file_index})
+
+
+# class LoginFormView(TemplateView):
+#     form_class = LoginForm
+#     template_name = 'login.html'
+
+def login_view(request):
+    global authenticated
+    form = LoginForm(request.POST) if request.method == 'POST' else LoginForm()
+    if request.method == 'POST' and form.is_valid():
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        # call procedure
+        # user = authenticate(request, username=username, password=password)
+        user = username
+        # user = None
+        logging.info(f'User: {user}')
+        if user is not None:
+            # login(request, user)
+            # request.session['is_authenticated'] = True
+            authenticated = True
+            user_directory = f'{RESULT_DIRECTORY}/{user}'
+            if not os.path.exists(user_directory):
+                os.makedirs(user_directory)
+            return redirect('index')
+        else:
+            logging.info(f'Invalid username or password')
+            # messages.error(request, 'Invalid username or password.')
+    return render(request, 'login.html', {'form': form})

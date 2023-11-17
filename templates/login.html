@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link href="{% static 'login.css' %}" rel="stylesheet">
+    <title>IP-finder</title>
+</head>
+<body>
+    <div class="container">
+        <header>IP-finder</header>
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="input-field">
+                <input type="text" name="username" required>
+                <label>Username</label>
+            </div>
+            <div class="input-field">
+                <input type="password" class="pswrd" name="password" required>
+                <label>Password</label>
+            </div>
+            <div class="button">
+                <div class="inner"></div>
+                <button>login</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

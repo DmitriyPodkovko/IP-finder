@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+# from django.contrib.auth.views import LoginView
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
@@ -22,6 +23,7 @@ from django.views.static import serve
 from config.handler_settings import RESULT_DIRECTORY
 
 urlpatterns = [
+    # path('login/', LoginView.as_view(), name='login'),
     path("", include("ipfinder.urls")),
     path('admin/', admin.site.urls),
     path('result/<path:path>/', serve, {'document_root': RESULT_DIRECTORY}),
