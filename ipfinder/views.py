@@ -1,6 +1,8 @@
 import os
 import logging
 from functools import wraps
+from django.contrib.auth import login
+from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
@@ -41,7 +43,6 @@ processed_rows: int = 0
 total_xlsx_rows: int = 0
 current_file_index: int = 0
 next_file_index: bool = False
-authenticated: bool = False
 
 
 def custom_login_required(login_url=None):
@@ -52,11 +53,10 @@ def custom_login_required(login_url=None):
 
     def decorator(view_func):
         @wraps(view_func)
-        def wrapped_view(*args, **kwargs):
-            # if not request.user.is_authenticated:
-            if not authenticated:
+        def wrapped_view(request, *args, **kwargs):
+            if not request.session.get('is_authenticated', False):
                 return redirect(login_url)
-            return view_func(*args, **kwargs)
+            return view_func(request, *args, **kwargs)
         return wrapped_view
     return decorator
 
@@ -223,20 +223,19 @@ def check_processing_status(request):
 #     template_name = 'login.html'
 
 def login_view(request):
-    global authenticated
     form = LoginForm(request.POST) if request.method == 'POST' else LoginForm()
     if request.method == 'POST' and form.is_valid():
         username = form.cleaned_data['username']
         password = form.cleaned_data['password']
         # call procedure
         # user = authenticate(request, username=username, password=password)
-        user = username
+        user, created = User.objects.get_or_create(username=username)
         # user = None
-        logging.info(f'User: {user}')
+        logging.info(f'User: {user}, created: {created}')
         if user is not None:
-            # login(request, user)
-            # request.session['is_authenticated'] = True
-            authenticated = True
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(request, user)
+            request.session['is_authenticated'] = True
             user_directory = f'{RESULT_DIRECTORY}/{user}'
             if not os.path.exists(user_directory):
                 os.makedirs(user_directory)

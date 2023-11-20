@@ -7,7 +7,7 @@
 #sudo ls -la /var/lib/docker/volumes/ip-finder_static/_data
 
 # apply database migrations
-#python manage.py migrate --no-input
+python manage.py migrate --no-input
 python manage.py runserver 0.0.0.0:8247
 
 # collect static files
