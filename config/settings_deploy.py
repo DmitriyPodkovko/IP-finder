@@ -95,6 +95,14 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME'),
         'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASS')
+    },
+    'auth': {
+        'ENGINE': 'django.db.backends.oracle',
+        'HOST': os.environ.get('DB_HOST_AUTH'),
+        'PORT': os.environ.get('DB_PORT_AUTH'),
+        'NAME': os.environ.get('DB_NAME_AUTH'),
+        'USER': os.environ.get('DB_USER_AUTH'),
+        'PASSWORD': os.environ.get('DB_PASS_AUTH')
     }
 }
 

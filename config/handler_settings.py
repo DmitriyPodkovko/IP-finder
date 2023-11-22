@@ -68,5 +68,6 @@ LIFE_IPS = ('37.73', '46.96', '88.154', '88.155')
 ORACLE_FUNCTIONS = {
     'tel_func': 'NEVA.ip_tr.restore_tel_from_ip_list',
     'inner_tel_func': 'NEVA.ip_tr.restore_tel_from_inner_ip_list',
-    'check_tel_func': 'NEVA.ip_tr.check_tel'
+    'check_tel_func': 'NEVA.ip_tr.check_tel',
+    'check_login_proc': 'check_login'
 }

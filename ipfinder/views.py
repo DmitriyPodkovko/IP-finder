@@ -1,18 +1,16 @@
 import os
 import logging
-from functools import wraps
-from django.contrib.auth import login
-from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import JsonResponse
 from django.views import View
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
 from django.urls import reverse_lazy
+from auth.auth import custom_login_required
 from db.executor import DBExecutor
 from excel.handler import ExcelHandler
-from .forms import FileFieldForm, LoginForm
+from ipfinder.forms import FileFieldForm
 from config.settings import (DEBUG, DATABASES,
                              ALLOWED_HOSTS)
 from config.handler_settings import (RESULT_DIRECTORY,
@@ -43,22 +41,6 @@ processed_rows: int = 0
 total_xlsx_rows: int = 0
 current_file_index: int = 0
 next_file_index: bool = False
-
-
-def custom_login_required(login_url=None):
-    """
-    Decorator for requiring user authentication.
-    :param login_url: URL to redirect in case of no authentication
-    """
-
-    def decorator(view_func):
-        @wraps(view_func)
-        def wrapped_view(request, *args, **kwargs):
-            if not request.session.get('is_authenticated', False):
-                return redirect(login_url)
-            return view_func(request, *args, **kwargs)
-        return wrapped_view
-    return decorator
 
 
 # @method_decorator(login_required(login_url='login'), name='dispatch')
@@ -144,13 +126,9 @@ class FileFieldFormView(FormView):
     # @method_decorator(custom_login_required(login_url='login'))
     # def dispatch(self, *args, **kwargs):
     #     if not self.request.session.get('is_authenticated', False):
-    #     if not is_authenticated:
     #         return HttpResponseRedirect('login')
     #     return super().dispatch(*args, **kwargs)
 
-
-# class FileLoadedView(TemplateView):
-#     template_name = 'loaded.html'
 
 @method_decorator(custom_login_required(login_url='login'), name='dispatch')
 class FileResultView(TemplateView):
@@ -216,31 +194,3 @@ def check_processing_status(request):
         next_file_index = False
     return JsonResponse({'progress': progress_percent,
                          'file_index': file_index})
-
-
-# class LoginFormView(TemplateView):
-#     form_class = LoginForm
-#     template_name = 'login.html'
-
-def login_view(request):
-    form = LoginForm(request.POST) if request.method == 'POST' else LoginForm()
-    if request.method == 'POST' and form.is_valid():
-        username = form.cleaned_data['username']
-        password = form.cleaned_data['password']
-        # call procedure
-        # user = authenticate(request, username=username, password=password)
-        user, created = User.objects.get_or_create(username=username)
-        # user = None
-        logging.info(f'User: {user}, created: {created}')
-        if user is not None:
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
-            login(request, user)
-            request.session['is_authenticated'] = True
-            user_directory = f'{RESULT_DIRECTORY}/{user}'
-            if not os.path.exists(user_directory):
-                os.makedirs(user_directory)
-            return redirect('index')
-        else:
-            logging.info(f'Invalid username or password')
-            # messages.error(request, 'Invalid username or password.')
-    return render(request, 'login.html', {'form': form})

@@ -12,6 +12,11 @@
         <header>IP-finder</header>
         <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
+            {% for message in messages %}
+                <script>
+                    alert("{{ message }}");
+                </script>
+            {% endfor %}
             <div class="input-field">
                 <input type="text" name="username" required>
                 <label>Username</label>
