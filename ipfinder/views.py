@@ -60,6 +60,7 @@ class FileFieldFormView(FormView):
             return self.form_invalid(form)
 
     def form_valid(self, form):
+        is_admin = self.request.session['is_admin_']
         global is_task_cancelled, current_file_index, next_file_index
         global processed_rows, total_xlsx_rows
         try:
@@ -96,7 +97,8 @@ class FileFieldFormView(FormView):
                                     if DST_numbers and next(iter(DST_numbers)) != 'ERROR':
                                         break
                             DST_numbers_ls.append(DST_numbers)
-                            if DST_numbers and next(iter(DST_numbers)) != 'ERROR':
+                            if (DST_numbers and next(iter(DST_numbers)) != 'ERROR'
+                                    and is_admin == 1):
                                 warning_numbers = db_executor.execute_check_numbers(DST_numbers)
                                 if warning_numbers:
                                     FileFieldFormView.all_warning_numbers |= warning_numbers

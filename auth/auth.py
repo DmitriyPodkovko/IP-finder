@@ -81,6 +81,8 @@ def login_view(request):
                         user.backend = 'django.contrib.auth.backends.ModelBackend'
                         login(request, user)
                         request.session['is_authenticated'] = True
+                        request.session['id_'] = answer[0]
+                        request.session['is_admin_'] = answer[1]
                         user_directory = f'{RESULT_DIRECTORY}/{user}'
                         if not os.path.exists(user_directory):
                             os.makedirs(user_directory)
