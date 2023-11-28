@@ -1,9 +1,10 @@
 from django.urls import path
-from auth.auth import login_view
+from auth.auth import login_view, logout_view
 from ipfinder import views
 
 urlpatterns = [
     path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
     path('', views.FileFieldFormView.as_view(), name='index'),
     path('result/', views.FileResultView.as_view(), name='result'),
     path('cancel-task/', views.CancelTaskView.as_view(), name='cancel_task'),

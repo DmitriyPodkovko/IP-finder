@@ -1,15 +1,15 @@
 import logging
-import os
 import cx_Oracle
 from functools import wraps
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.db import connections
 from django.shortcuts import redirect, render
 from config.handler_settings import (ORACLE_FUNCTIONS,
                                      RESULT_DIRECTORY)
 from ipfinder.forms import LoginForm
+from log.log import create_log_file
 
 
 class DBAuthentication:
@@ -19,7 +19,7 @@ class DBAuthentication:
     def connect_on(self) -> bool:
         try:
             self._cursor = connections['auth'].cursor()
-            logging.info(f'AUTH CONNECT ON')
+            logging.info(f'auth connect on')
             return True
         except Exception as e:
             logging.error(f'DB error auth connect on:\n {str(e)}')
@@ -28,7 +28,7 @@ class DBAuthentication:
     def connect_off(self) -> None:
         try:
             self._cursor.close()
-            logging.info(f'AUTH CONNECT OFF')
+            logging.info(f'auth connect off')
         except Exception as e:
             logging.error(f'DB error auth connect off:\n {str(e)}')
 
@@ -76,16 +76,19 @@ def login_view(request):
                 answer = auth.check(username, password)
                 if answer[0] > 0:
                     user, created = User.objects.get_or_create(username=username)
-                    logging.info(f'User: {user}, created: {created}')
+                    logging.info(f'Login user: {user}, created: {created}')
                     if user is not None:
                         user.backend = 'django.contrib.auth.backends.ModelBackend'
                         login(request, user)
-                        request.session['is_authenticated'] = True
                         request.session['id_'] = answer[0]
                         request.session['is_admin_'] = answer[1]
+                        request.session['user_'] = username
+                        request.session['is_authenticated'] = True
                         user_directory = f'{RESULT_DIRECTORY}/{user}'
-                        if not os.path.exists(user_directory):
-                            os.makedirs(user_directory)
+                        user_log = f'{user_directory}/{user}.log'
+                        request.session['user_directory'] = user_directory
+                        request.session['user_log'] = user_log
+                        create_log_file(user_directory, user_log)
                         return redirect('index')
                 else:
                     logging.info(f'Invalid username or password!')
@@ -93,3 +96,14 @@ def login_view(request):
             finally:
                 auth.connect_off()
     return render(request, 'login.html', {'form': form})
+
+
+def logout_view(request):
+    try:
+        user_ = request.session['user_']
+        logout(request)
+        logging.info(f'Log out user: {user_}')
+        return redirect('login')
+    except Exception as e:
+        logging.error(f'Log out error:\n {str(e)}')
+        return redirect('login')

@@ -53,6 +53,14 @@
                 <span class="button-text" id="cancel-text">Cancel</span>
             </div>
         </div>
+
+        <div class="button" id="logout">
+            <div class="content">
+                <a href="{% url 'logout' %}" class="button-text" style="text-decoration: none;">[-> Log out</a>
+<!--                <span class="button-text" id="logout-text">Logout</span>-->
+            </div>
+        </div>
+
         <div>
             {% if warning_numbers %} <br>
                 <span>WARNING NUMBERS:</span>
@@ -61,7 +69,9 @@
                 {% endfor %}
             {% endif %}
         </div>
-        <a href="{% url 'edit_settings' %}" target="_blank">SETTINGS</a>
+        {% if is_admin == 1 %}
+            <a href="{% url 'edit_settings' %}" target="_blank">SETTINGS</a>
+        {% endif %}
     </div>
 </body>
 
@@ -331,7 +341,7 @@ window.onload = () => {
                     clearInterval(progressData[buttonIndex])
                 }
             }
-        }, 100);
+        }, 1000);
         progressData[buttonIndex] = interval
     }
 

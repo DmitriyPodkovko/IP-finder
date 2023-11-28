@@ -38,7 +38,7 @@ class ExcelHandler:
             logging.error(f'Error input .xlsx file:\n {self._xlsx_file} ({str(e)})')
             return []
 
-    def create_output_xlsx_file(self) -> None:
+    def create_output_xlsx_file(self, user_directory) -> None:
         try:
             workbook = openpyxl.load_workbook(self._xlsx_file)
             sheet = workbook.active
@@ -51,7 +51,7 @@ class ExcelHandler:
                 self._DST_column_idx = sheet.max_column + 1
                 sheet.cell(row=1, column=self._DST_column_idx, value=DESTINATION_NUMBER)
             file_name, file_extension = os.path.splitext(self._xlsx_file.name)
-            self._xlsx_output_file = f'{RESULT_DIRECTORY}/{file_name}{EXCEL_OUTPUT_FILE_PREFIX}.xlsx'
+            self._xlsx_output_file = f'{user_directory}/{file_name}{EXCEL_OUTPUT_FILE_PREFIX}.xlsx'
             workbook.save(self._xlsx_output_file)
             workbook.close()
             logging.info(f'CREATED: {self._xlsx_output_file}')

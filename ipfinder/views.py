@@ -1,5 +1,6 @@
 import os
 import logging
+from log.log import create_log_file
 from django.utils.decorators import method_decorator
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -11,31 +12,9 @@ from auth.auth import custom_login_required
 from db.executor import DBExecutor
 from excel.handler import ExcelHandler
 from ipfinder.forms import FileFieldForm
-from config.settings import (DEBUG, DATABASES,
-                             ALLOWED_HOSTS)
-from config.handler_settings import (RESULT_DIRECTORY,
-                                     ROWS_QUANTITY,
+from config.handler_settings import (ROWS_QUANTITY,
                                      SETTINGS_FILE_PATH)
 
-
-def create_log_file():
-    if not os.path.exists(f'{RESULT_DIRECTORY}/ipfinder.log'):
-        logging.basicConfig(filename=f'{RESULT_DIRECTORY}/ipfinder.log',
-                            level=logging.INFO,
-                            format='%(asctime)s - %(levelname)s - %(message)s',
-                            force=True)
-
-
-if not os.path.exists(RESULT_DIRECTORY):
-    os.makedirs(RESULT_DIRECTORY)
-create_log_file()
-logging.info(f'DEBUG = {DEBUG}')
-# logging.info(f'SETTINGS_FILE_PATH = {SETTINGS_FILE_PATH}')
-# logging.info(f'STATICFILES_DIRS = {STATICFILES_DIRS}')
-# logging.info(f'STATIC_ROOT = {STATIC_ROOT}')
-logging.info(f"DATABASES = {DATABASES.get('filter')}")
-# logging.info(f'STATIC_URL = {STATIC_URL}')
-logging.info(f'ALLOWED_HOSTS = {ALLOWED_HOSTS}')
 is_task_cancelled = False
 processed_rows: int = 0
 total_xlsx_rows: int = 0
@@ -61,10 +40,12 @@ class FileFieldFormView(FormView):
 
     def form_valid(self, form):
         is_admin = self.request.session['is_admin_']
+        user_directory = self.request.session['user_directory']
+        user_log = self.request.session['user_log']
         global is_task_cancelled, current_file_index, next_file_index
         global processed_rows, total_xlsx_rows
         try:
-            create_log_file()
+            create_log_file(user_directory, user_log)
             current_rows_quantity = ROWS_QUANTITY
             files = form.cleaned_data["file_field"]
             # logging.info(f'{self.request.META}')
@@ -78,7 +59,7 @@ class FileFieldFormView(FormView):
                 excel_handler = ExcelHandler(f)
                 ip_list = excel_handler.get_ip_list_from_xlsx_file()
                 total_xlsx_rows = len(ip_list)
-                excel_handler.create_output_xlsx_file()
+                excel_handler.create_output_xlsx_file(user_directory)
                 db_executor = DBExecutor()
                 if db_executor.connect_on():
                     try:
@@ -120,6 +101,7 @@ class FileFieldFormView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['is_admin'] = self.request.session['is_admin_']
         if FileFieldFormView.all_warning_numbers:
             context['warning_numbers'] = FileFieldFormView.all_warning_numbers
             FileFieldFormView.all_warning_numbers = set()
@@ -137,8 +119,9 @@ class FileResultView(TemplateView):
     template_name = 'result.html'
 
     def get_context_data(self, **kwargs):
+        user_directory = self.request.session['user_directory']
         context = super().get_context_data(**kwargs)
-        context['result_files'] = os.listdir(RESULT_DIRECTORY)
+        context['result_files'] = os.listdir(user_directory)
         return context
 
 
@@ -155,8 +138,9 @@ class CancelTaskView(View):
 def delete_file(request):
     if request.method == 'POST':
         # Get the file name from the POST request
+        user_directory = request.session['user_directory']
         file_name = request.POST.get('file_name')
-        file_path = os.path.join(RESULT_DIRECTORY, file_name)
+        file_path = os.path.join(user_directory, file_name)
         try:
             # Try to delete the file
             os.remove(file_path)
