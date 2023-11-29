@@ -17,7 +17,9 @@
             <ul class="links">
                 {% for file_name in result_files %}
                     <li class="details">
-                        <a class="name" href="{{ file_name }}" download>Download {{ file_name }}</a>
+<!--                        if download files only from the shared directory-->
+<!--                        <a class="name" href="{{ file_name }}" download>Download {{ file_name }}</a>-->
+                        <a class="name" href="{% url 'download_file' file_name %}">Download {{ file_name }}</a>
                         <button class="delete" onclick="deleteFile('{{ file_name }}')">
                             <span class="btn-text" user-select="none">Delete</span>
                         </button>

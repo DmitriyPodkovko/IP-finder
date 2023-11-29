@@ -3,7 +3,7 @@ import logging
 from log.log import create_log_file
 from django.utils.decorators import method_decorator
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from django.views import View
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
@@ -135,6 +135,14 @@ class CancelTaskView(View):
 
 
 @custom_login_required(login_url='login')
+def download_file(request, file_name):
+    user_directory = request.session['user_directory']
+    file_path = os.path.join(user_directory, file_name)
+    file_response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+    return file_response
+
+
+@custom_login_required(login_url='login')
 def delete_file(request):
     if request.method == 'POST':
         # Get the file name from the POST request
@@ -180,3 +188,4 @@ def check_processing_status(request):
         next_file_index = False
     return JsonResponse({'progress': progress_percent,
                          'file_index': file_index})
+
