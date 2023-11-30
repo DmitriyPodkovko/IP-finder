@@ -102,3 +102,19 @@ form .button{
 input{
     color: #34497a;
 }
+
+.input-field svg {
+    color: grey;
+    font-size: 18px;
+    transition: .4s;
+    height: 26px;
+    width: 28px;
+    position: absolute;
+    right: 20px;
+    top: 25%;
+    cursor: pointer;
+}
+
+.input-field svg:hover {
+    color: #34497a;
+}
