@@ -29,6 +29,7 @@ class FileFieldFormView(FormView):
     template_name = 'index.html'
     success_url = reverse_lazy('index')
     all_warning_numbers = set()
+    warning_name_files = ''
 
     def post(self, request, *args, **kwargs):
         form_class = self.get_form_class()
@@ -53,6 +54,10 @@ class FileFieldFormView(FormView):
             for k, f in enumerate(files):  # Do with each file.
                 current_file_index = k
                 logging.info(f'GET: {f}')
+                file_name, file_extension = os.path.splitext(f.name)
+                FileFieldFormView.warning_name_files = (
+                    ' '.join([FileFieldFormView.warning_name_files,
+                              file_name + file_extension]))
                 if is_task_cancelled:
                     logging.info("TASK CANCELLED !!!")
                     break
@@ -103,8 +108,10 @@ class FileFieldFormView(FormView):
         context = super().get_context_data(**kwargs)
         context['is_admin'] = self.request.session['is_admin_']
         if FileFieldFormView.all_warning_numbers:
+            context['warning_name_files'] = FileFieldFormView.warning_name_files
             context['warning_numbers'] = FileFieldFormView.all_warning_numbers
             FileFieldFormView.all_warning_numbers = set()
+        FileFieldFormView.warning_name_files = ''
         return context
 
     # @method_decorator(custom_login_required(login_url='login'))

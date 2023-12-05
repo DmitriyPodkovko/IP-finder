@@ -63,10 +63,10 @@
 
         <div>
             {% if warning_numbers %} <br>
-                <span>WARNING NUMBERS:</span>
+                <span id="warningNameFiles">WARNING NUMBERS in files {{ warning_name_files }}:</span>
                 {% for number in warning_numbers %}
                     <span id="warningNumbers">{{ number }}</span>
-                {% endfor %}
+                {% endfor %} <br> <br>
             {% endif %}
         </div>
         {% if is_admin == 1 %}
@@ -214,17 +214,18 @@ cancelButton.addEventListener("click", async () => {
 });
 
 window.onload = () => {
+    const warningNameFiles = document.getElementById("warningNameFiles");
     const warningNumbers = document.getElementById("warningNumbers");
     const warningNumbersList = document.querySelectorAll("#warningNumbers");
 
     if (warningNumbers && warningNumbers.innerText.trim() !== "") {
-        let warningNumbersText = "WARNING NUMBERS:\n";
+        let warningNumbersText = "\n";
 
         warningNumbersList.forEach(numberElement => {
             warningNumbersText += numberElement.innerText + "\n";
         });
 
-        alert(warningNumbersText);
+        alert(warningNameFiles.innerText + warningNumbersText);
     }
 };
 
