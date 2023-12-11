@@ -1,6 +1,6 @@
 import os
 import logging
-from log.log import create_log_file
+from json import loads, JSONDecodeError
 from django.utils.decorators import method_decorator
 from django.shortcuts import render
 from django.http import JsonResponse, FileResponse
@@ -8,6 +8,7 @@ from django.views import View
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
 from django.urls import reverse_lazy
+from log.log import create_log_file
 from auth.auth import custom_login_required
 from db.executor import DBExecutor
 from excel.handler import ExcelHandler
@@ -131,6 +132,7 @@ class FileResultView(TemplateView):
         files = os.listdir(user_directory)
         files.sort(key=lambda x: os.path.getmtime(os.path.join(user_directory, x)), reverse=True)
         context['result_files'] = files
+        context['has_files'] = bool(files)
         return context
 
 
@@ -151,19 +153,45 @@ def download_file(request, file_name):
     return file_response
 
 
+# @custom_login_required(login_url='login')
+# def delete_file(request):
+#     if request.method == 'POST':
+#         # Get the file name from the POST request
+#         user_directory = request.session['user_directory']
+#         file_name = request.POST.get('file_name')
+#         file_path = os.path.join(user_directory, file_name)
+#         try:
+#             # Try to delete the file
+#             os.remove(file_path)
+#             response_data = {'success': True}
+#         except OSError:
+#             response_data = {'success': False}
+#         return JsonResponse(response_data)
+#     # If the request method is not POST, we will return an error
+#     return JsonResponse({'success': False})
+
+
 @custom_login_required(login_url='login')
 def delete_file(request):
     if request.method == 'POST':
-        # Get the file name from the POST request
         user_directory = request.session['user_directory']
-        file_name = request.POST.get('file_name')
-        file_path = os.path.join(user_directory, file_name)
+        # Get the file names from the JSON
         try:
-            # Try to delete the file
-            os.remove(file_path)
-            response_data = {'success': True}
-        except OSError:
-            response_data = {'success': False}
+            file_names = loads(request.body.decode('utf-8'))['file_names']
+        except (KeyError, JSONDecodeError):
+            return JsonResponse({'success': False})
+
+        success = True
+
+        for file_name in file_names:
+            file_path = os.path.join(user_directory, file_name)
+            try:
+                # Try to delete the file
+                os.remove(file_path)
+            except OSError:
+                success = False
+
+        response_data = {'success': success}
         return JsonResponse(response_data)
     # If the request method is not POST, we will return an error
     return JsonResponse({'success': False})
