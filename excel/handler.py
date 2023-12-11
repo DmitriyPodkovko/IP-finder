@@ -12,7 +12,7 @@ from config.handler_settings import (EXCEL_ROW_COLUMN,
 class ExcelHandler:
     def __init__(self, xlsx_file) -> None:
         self._xlsx_file = xlsx_file
-        self._cell_style = None
+        # self._cell_style = None
         self._DST_column_idx = None
         self._xlsx_output_file = None
         self._current_row = EXCEL_ROW_COLUMN.get('default').get('Start_row')
@@ -42,9 +42,9 @@ class ExcelHandler:
         try:
             workbook = openpyxl.load_workbook(self._xlsx_file)
             sheet = workbook.active
-            self._cell_style = NamedStyle(name='cell_style')
-            self._cell_style.font = sheet.cell(row=1, column=1).font.copy()
-            self._cell_style.border = sheet.cell(row=1, column=1).border.copy()
+            # self._cell_style = NamedStyle(name='cell_style')
+            # self._cell_style.font = sheet.cell(row=1, column=1).font.copy()
+            # self._cell_style.border = sheet.cell(row=1, column=1).border.copy()
             if EXCEL_ROW_COLUMN.get('default').get('DST') >= 0:
                 self._DST_column_idx = EXCEL_ROW_COLUMN.get('default').get('DST') + 1
             else:
@@ -65,8 +65,9 @@ class ExcelHandler:
             for dst_set in dst_list:
                 current_column_idx = self._DST_column_idx
                 for number in dst_set:
-                    new_cell = sheet.cell(row=self._current_row, column=current_column_idx, value=number)
-                    new_cell.style = self._cell_style
+                    sheet.cell(row=self._current_row, column=current_column_idx, value=number)
+                    # There is a bug in the library with style assignment
+                    # new_cell.style = self._cell_style
                     current_column_idx += 1
                 self._current_row += 1
             workbook.save(self._xlsx_output_file)
