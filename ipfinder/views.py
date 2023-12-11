@@ -128,7 +128,9 @@ class FileResultView(TemplateView):
     def get_context_data(self, **kwargs):
         user_directory = self.request.session['user_directory']
         context = super().get_context_data(**kwargs)
-        context['result_files'] = os.listdir(user_directory)
+        files = os.listdir(user_directory)
+        files.sort(key=lambda x: os.path.getmtime(os.path.join(user_directory, x)), reverse=True)
+        context['result_files'] = files
         return context
 
 
