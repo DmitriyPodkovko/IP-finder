@@ -69,6 +69,13 @@
                 {% endfor %} <br> <br>
             {% endif %}
         </div>
+
+        {% if errors %}
+            <script>
+                alert("Check the log file for ERRORS:\n{{ errors|escapejs }}");
+            </script>
+        {% endif %}
+
         {% if is_admin == 1 %}
             <a href="{% url 'edit_settings' %}" target="_blank">SETTINGS</a>
         {% endif %}

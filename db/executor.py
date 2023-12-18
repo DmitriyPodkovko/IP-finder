@@ -15,6 +15,7 @@ class DBExecutor:
     def __init__(self) -> None:
         self._cursor = None
         self._ip_tuple = None
+        self.errors = ''
 
     def connect_on(self) -> bool:
         try:
@@ -23,6 +24,7 @@ class DBExecutor:
             return True
         except Exception as e:
             logging.error(f'DB error connect on:\n {str(e)}')
+            self.errors += 'connect on error\n'
             return False
 
     def connect_off(self) -> None:
@@ -31,6 +33,7 @@ class DBExecutor:
             logging.info(f'CONNECT OFF')
         except Exception as e:
             logging.error(f'DB error connect off:\n {str(e)}')
+            self.errors += 'connect off error\n'
 
     def execute(self, ip_tuple: tuple) -> set:
         try:
@@ -66,6 +69,7 @@ class DBExecutor:
             return result
         except Exception as e:
             logging.error(f'DB error execute:\n {str(e)}')
+            self.errors += 'execute error\n'
             return {'ERROR'}
 
     def execute_check_numbers(self, numbers: set) -> set:
@@ -84,6 +88,7 @@ class DBExecutor:
             return result
         except Exception as e:
             logging.error(f'DB error execute:\n {str(e)}')
+            self.errors += 'check numbers error\n'
             return result
 
 

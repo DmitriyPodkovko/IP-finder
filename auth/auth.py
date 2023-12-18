@@ -88,6 +88,7 @@ def login_view(request):
                         user_log = f'{user_directory}/{user}.log'
                         request.session['user_directory'] = user_directory
                         request.session['user_log'] = user_log
+                        request.session['errors'] = ''
                         create_log_file(user_directory, user_log)
                         return redirect('index')
                 else:

@@ -16,6 +16,7 @@ class ExcelHandler:
         self._DST_column_idx = None
         self._xlsx_output_file = None
         self._current_row = EXCEL_ROW_COLUMN.get('default').get('Start_row')
+        self.errors = ''
 
     def get_ip_list_from_xlsx_file(self) -> list[tuple[Any, Any, Any, Any, Any]] | list[Any]:
         try:
@@ -36,6 +37,7 @@ class ExcelHandler:
             return ip_list
         except Exception as e:
             logging.error(f'Error input .xlsx file:\n {self._xlsx_file} ({str(e)})')
+            self.errors += 'get xlsx error\n'
             return []
 
     def create_output_xlsx_file(self, user_directory) -> None:
@@ -57,6 +59,7 @@ class ExcelHandler:
             logging.info(f'CREATED: {self._xlsx_output_file}')
         except Exception as e:
             logging.error(f'Error creating .xlsx file:\n {self._xlsx_file} ({str(e)})')
+            self.errors += 'create xlsx error\n'
 
     def save_result_to_output_xlsx_file(self, dst_list: list) -> None:
         try:
@@ -75,3 +78,4 @@ class ExcelHandler:
             logging.info(f'saved')
         except Exception as e:
             logging.error(f'Error saving .xlsx:\n {self._xlsx_file} ({str(e)})')
+            self.errors += 'save xlsx error\n'

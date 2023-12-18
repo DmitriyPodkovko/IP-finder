@@ -64,8 +64,12 @@ class FileFieldFormView(FormView):
                     break
                 excel_handler = ExcelHandler(f)
                 ip_list = excel_handler.get_ip_list_from_xlsx_file()
+                self.request.session['errors'] += excel_handler.errors
+                excel_handler.errors = ''
                 total_xlsx_rows = len(ip_list)
                 excel_handler.create_output_xlsx_file(user_directory)
+                self.request.session['errors'] += excel_handler.errors
+                excel_handler.errors = ''
                 db_executor = DBExecutor()
                 if db_executor.connect_on():
                     try:
@@ -76,6 +80,8 @@ class FileFieldFormView(FormView):
                                 logging.info("TASK CANCELLED !!!")
                                 break
                             DST_numbers = db_executor.execute(tuple_values)
+                            self.request.session['errors'] += db_executor.errors
+                            db_executor.errors = ''
                             logging.info(f'response: {DST_numbers}')
                             # if response is error then repeat request 5 time
                             if DST_numbers and next(iter(DST_numbers)) == 'ERROR':
@@ -83,15 +89,20 @@ class FileFieldFormView(FormView):
                                     DST_numbers = db_executor.execute(tuple_values)
                                     if DST_numbers and next(iter(DST_numbers)) != 'ERROR':
                                         break
+                                db_executor.errors = ''
                             DST_numbers_ls.append(DST_numbers)
                             if (DST_numbers and next(iter(DST_numbers)) != 'ERROR'
                                     and is_admin == 1):
                                 warning_numbers = db_executor.execute_check_numbers(DST_numbers)
+                                self.request.session['errors'] += db_executor.errors
+                                db_executor.errors = ''
                                 if warning_numbers:
                                     FileFieldFormView.all_warning_numbers |= warning_numbers
                                     logging.info(f'!!! WARNING NUMBERS: {warning_numbers} !!!')
                             if i + 1 == current_rows_quantity or i + 1 == len(ip_list):
                                 excel_handler.save_result_to_output_xlsx_file(DST_numbers_ls)
+                                self.request.session['errors'] += excel_handler.errors
+                                excel_handler.errors = ''
                                 DST_numbers_ls = []
                                 current_rows_quantity += ROWS_QUANTITY
                             processed_rows += 1
@@ -99,6 +110,12 @@ class FileFieldFormView(FormView):
                         next_file_index = True
                         processed_rows = 0
                         db_executor.connect_off()
+                        self.request.session['errors'] += db_executor.errors
+                else:
+                    self.request.session['errors'] += db_executor.errors
+        except Exception as e:
+            logging.error(f'General error:\n {str(e)}')
+            self.request.session['errors'] += 'general error\n'
         finally:
             current_file_index = 0
             next_file_index = False
@@ -113,6 +130,9 @@ class FileFieldFormView(FormView):
             context['warning_numbers'] = FileFieldFormView.all_warning_numbers
             FileFieldFormView.all_warning_numbers = set()
         FileFieldFormView.warning_name_files = ''
+        if self.request.session['errors']:
+            context['errors'] = self.request.session['errors']
+            self.request.session['errors'] = ''
         return context
 
     # @method_decorator(custom_login_required(login_url='login'))
