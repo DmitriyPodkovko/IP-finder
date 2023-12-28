@@ -56,9 +56,6 @@ class FileFieldFormView(FormView):
                 current_file_index = k
                 logging.info(f'GET: {f}')
                 file_name, file_extension = os.path.splitext(f.name)
-                FileFieldFormView.warning_name_files = (
-                    ' '.join([FileFieldFormView.warning_name_files,
-                              file_name + file_extension]))
                 if is_task_cancelled:
                     logging.info("TASK CANCELLED !!!")
                     break
@@ -97,6 +94,9 @@ class FileFieldFormView(FormView):
                                 self.request.session['errors'] += db_executor.errors
                                 db_executor.errors = ''
                                 if warning_numbers:
+                                    FileFieldFormView.warning_name_files = (
+                                        ' '.join([FileFieldFormView.warning_name_files,
+                                                  file_name + file_extension]))
                                     FileFieldFormView.all_warning_numbers |= warning_numbers
                                     logging.info(f'!!! WARNING NUMBERS: {warning_numbers} !!!')
                             if i + 1 == current_rows_quantity or i + 1 == len(ip_list):
