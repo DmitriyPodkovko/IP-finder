@@ -31,8 +31,10 @@ class ExcelHandler:
                     row[EXCEL_ROW_COLUMN.get('default').get('Time')],
                     row[EXCEL_ROW_COLUMN.get('default').get('Provider')]
                 )
-                ip_list.append(ip_tuple)
-                logging.info(f'IP_DST, Port_DST, Date, Time, Provider: {ip_tuple}')
+                # Check if all elements in the tuple are not empty
+                if all(ip_tuple):
+                    ip_list.append(ip_tuple)
+                    logging.info(f'IP_DST, Port_DST, Date, Time, Provider: {ip_tuple}')
             workbook.close()
             return ip_list
         except Exception as e:
