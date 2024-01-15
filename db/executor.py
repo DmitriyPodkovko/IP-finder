@@ -45,8 +45,15 @@ class DBExecutor:
             first_two_ip_octets = '.'.join(ip.split('.')[:2])
             first_three_ip_octets = '.'.join(ip.split('.')[:3])
             operator = OPERATORS.get(self._ip_tuple[4])
-            dt = datetime.strptime(self._ip_tuple[2] + ' ' + self._ip_tuple[3],
-                                   '%d.%m.%Y %H:%M:%S')
+            if type(self._ip_tuple[2]) is datetime:
+                d_ = self._ip_tuple[2].strftime('%d.%m.%Y')
+            else:
+                d_ = self._ip_tuple[2]
+            if type(self._ip_tuple[3]) is datetime:
+                t_ = self._ip_tuple[3].strftime('%H:%M:%S')
+            else:
+                t_ = self._ip_tuple[3]
+            dt = datetime.strptime(d_ + ' ' + t_, '%d.%m.%Y %H:%M:%S')
             # checkout = CheckoutInnerIP(first_octet_ip, operator)
             checkout = CheckoutIP(first_two_ip_octets, first_three_ip_octets, operator)
             # if checkout.check_inner():
@@ -125,7 +132,6 @@ class CheckoutIP:
             logging.info(f'_case_LIFE for func -> True')
             return True
         return False
-
 
 # class CheckoutInnerIP:
 #
