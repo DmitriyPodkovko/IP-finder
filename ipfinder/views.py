@@ -42,6 +42,7 @@ class FileFieldFormView(FormView):
 
     def form_valid(self, form):
         is_admin = self.request.session['is_admin_']
+        username = self.request.session['user_']
         user_directory = self.request.session['user_directory']
         user_log = self.request.session['user_log']
         global is_task_cancelled, current_file_index, next_file_index
@@ -76,14 +77,14 @@ class FileFieldFormView(FormView):
                             if is_task_cancelled:
                                 logging.info("TASK CANCELLED !!!")
                                 break
-                            DST_numbers = db_executor.execute(tuple_values)
+                            DST_numbers = db_executor.execute(username, tuple_values)
                             self.request.session['errors'] += db_executor.errors
                             db_executor.errors = ''
                             logging.info(f'response: {DST_numbers}')
                             # if response is error then repeat request 5 time
                             if DST_numbers and next(iter(DST_numbers)) == 'ERROR':
                                 for j in range(5):
-                                    DST_numbers = db_executor.execute(tuple_values)
+                                    DST_numbers = db_executor.execute(username, tuple_values)
                                     if DST_numbers and next(iter(DST_numbers)) != 'ERROR':
                                         break
                                 db_executor.errors = ''

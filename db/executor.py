@@ -35,7 +35,7 @@ class DBExecutor:
             logging.error(f'DB error connect off:\n {str(e)}')
             self.errors += 'connect off error\n'
 
-    def execute(self, ip_tuple: tuple) -> set:
+    def execute(self, username, ip_tuple: tuple) -> set:
         try:
             result = set()
             self._ip_tuple = ip_tuple
@@ -59,15 +59,15 @@ class DBExecutor:
             # if checkout.check_inner():
             if checkout.check():
                 oracle_func = ORACLE_FUNCTIONS.get('tel_func')
-                logging.info(f'{oracle_func}, {ip}, {port}, {operator}, {dt}')
+                logging.info(f'{oracle_func}, {username}, {ip}, {port}, {operator}, {dt}')
                 ref_cursor = self._cursor.callfunc(oracle_func, cx_Oracle.CURSOR,
-                                                   [ip, port, operator, dt])
+                                                   [username, ip, port, operator, dt])
                 logging.info(f'request done')
             else:
                 oracle_func = ORACLE_FUNCTIONS.get('inner_tel_func')
-                logging.info(f'{oracle_func}, {ip}, {operator}, {dt}')
+                logging.info(f'{oracle_func}, {username}, {ip}, {operator}, {dt}')
                 ref_cursor = self._cursor.callfunc(oracle_func, cx_Oracle.CURSOR,
-                                                   [ip, operator, dt])
+                                                   [username, ip, operator, dt])
                 logging.info(f'request done')
             if ref_cursor:
                 for row in ref_cursor.fetchall():
