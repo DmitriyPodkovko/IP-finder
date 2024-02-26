@@ -11,18 +11,35 @@
 <body>
     <div class="wrapper">
         <header>Edit application settings:</header>
+        <div style="display: flex">
+            <div class="button" id="export">
+                <div class="content">
+                    <span class="button-text">Export settings</span>
+                </div>
+            </div>
+            <div class="button" id="import" >
+                <input type="file" id="file-input" style="display: none;">
+                <label for="file-input" style="cursor: pointer">
+                    <span class="content">
+                        <span class="button-text">Import settings</span>
+                    </span>
+                </label>
+            </div>
+        </div>
         <form method="post" enctype="multipart/form-data" id="settings-form">
             {% csrf_token %}
             <textarea name="settings_text" rows="11" cols="50" style="border: none">{{ current_settings_text }}</textarea>
         </form>
-        <div class="button" id="save">
-            <div class="content">
-                <span class="button-text">Save</span>
+        <div style="display: flex">
+            <div class="button" id="save">
+                <div class="content">
+                    <span class="button-text">Save</span>
+                </div>
             </div>
-        </div>
-        <div class="button" id="cancel" data-original-settings="{{ current_settings_text }}">
-            <div class="content">
-                <span class="button-text" id="cancel-text">Cancel</span>
+            <div class="button" id="cancel" data-original-settings="{{ current_settings_text }}">
+                <div class="content">
+                    <span class="button-text" id="cancel-text">Cancel</span>
+                </div>
             </div>
         </div>
         <div class="button" id="close">
@@ -68,6 +85,30 @@
 
         document.getElementById('close').addEventListener('click', function () {
             window.close();
+        });
+
+        // Export settings
+        document.getElementById('export').addEventListener('click', function () {
+            var settingsText = document.querySelector('textarea[name="settings_text"]').value;
+            // Create a link to download a text file
+            var blob = new Blob([settingsText], { type: "text/plain;charset=utf-8" });
+            var a = document.createElement('a');
+            a.href = window.URL.createObjectURL(blob);
+            a.download = 'settings.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        // Import settings
+        document.getElementById('file-input').addEventListener('change', function (event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var importedSettings = e.target.result;
+                document.querySelector('textarea[name="settings_text"]').value = importedSettings;
+            };
+            reader.readAsText(file);
         });
 
     </script>
