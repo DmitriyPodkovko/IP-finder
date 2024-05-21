@@ -16,12 +16,6 @@ from ipfinder.forms import FileFieldForm
 from config.handler_settings import (ROWS_QUANTITY,
                                      SETTINGS_FILE_PATH)
 
-is_task_cancelled = False
-processed_rows: int = 0
-total_xlsx_rows: int = 0
-current_file_index: int = 0
-next_file_index: bool = False
-
 
 # @method_decorator(login_required(login_url='login'), name='dispatch')
 @method_decorator(custom_login_required(login_url='login'), name='dispatch')
@@ -31,6 +25,11 @@ class FileFieldFormView(FormView):
     success_url = reverse_lazy('index')
     all_warning_numbers = set()
     warning_name_files = ''
+    is_task_cancelled = False
+    processed_rows: int = 0
+    total_xlsx_rows: int = 0
+    current_file_index: int = 0
+    next_file_index: bool = False
 
     def post(self, request, *args, **kwargs):
         form_class = self.get_form_class()
@@ -45,8 +44,6 @@ class FileFieldFormView(FormView):
         username = self.request.session['user_']
         user_directory = self.request.session['user_directory']
         user_log = self.request.session['user_log']
-        global is_task_cancelled, current_file_index, next_file_index
-        global processed_rows, total_xlsx_rows
         try:
             create_log_file(user_directory, user_log)
             current_rows_quantity = ROWS_QUANTITY
@@ -54,17 +51,17 @@ class FileFieldFormView(FormView):
             # logging.info(f'{self.request.META}')
             logging.info(files)
             for k, f in enumerate(files):  # Do with each file.
-                current_file_index = k
+                FileFieldFormView.current_file_index = k
                 logging.info(f'GET: {f}')
                 file_name, file_extension = os.path.splitext(f.name)
-                if is_task_cancelled:
+                if FileFieldFormView.is_task_cancelled:
                     logging.info("TASK CANCELLED !!!")
                     break
                 excel_handler = ExcelHandler(f)
                 ip_list = excel_handler.get_ip_list_from_xlsx_file()
                 self.request.session['errors'] += excel_handler.errors
                 excel_handler.errors = ''
-                total_xlsx_rows = len(ip_list)
+                FileFieldFormView.total_xlsx_rows = len(ip_list)
                 excel_handler.create_output_xlsx_file(user_directory)
                 self.request.session['errors'] += excel_handler.errors
                 excel_handler.errors = ''
@@ -72,9 +69,9 @@ class FileFieldFormView(FormView):
                 if db_executor.connect_on():
                     try:
                         DST_numbers_ls = []
-                        processed_rows = 0
+                        FileFieldFormView.processed_rows = 0
                         for i, tuple_values in enumerate(ip_list):
-                            if is_task_cancelled:
+                            if FileFieldFormView.is_task_cancelled:
                                 logging.info("TASK CANCELLED !!!")
                                 break
                             DST_numbers = db_executor.execute(username, tuple_values)
@@ -106,10 +103,10 @@ class FileFieldFormView(FormView):
                                 excel_handler.errors = ''
                                 DST_numbers_ls = []
                                 current_rows_quantity += ROWS_QUANTITY
-                            processed_rows += 1
+                            FileFieldFormView.processed_rows += 1
                     finally:
-                        next_file_index = True
-                        processed_rows = 0
+                        FileFieldFormView.next_file_index = True
+                        FileFieldFormView.processed_rows = 0
                         db_executor.connect_off()
                         self.request.session['errors'] += db_executor.errors
                 else:
@@ -118,9 +115,9 @@ class FileFieldFormView(FormView):
             logging.error(f'General error:\n {str(e)}')
             self.request.session['errors'] += 'general error\n'
         finally:
-            current_file_index = 0
-            next_file_index = False
-            is_task_cancelled = False
+            FileFieldFormView.current_file_index = 0
+            FileFieldFormView.next_file_index = False
+            FileFieldFormView.is_task_cancelled = False
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -160,9 +157,8 @@ class FileResultView(TemplateView):
 @method_decorator(custom_login_required(login_url='login'), name='dispatch')
 class CancelTaskView(View):
     def post(self, request, *args, **kwargs):
-        global is_task_cancelled
         logging.info("TASK CANCELLATION REQUESTED ...")
-        is_task_cancelled = True
+        FileFieldFormView.is_task_cancelled = True
         return JsonResponse({"status": "cancelled"})
 
 
@@ -234,16 +230,16 @@ def edit_settings(request):
 
 
 def check_processing_status(request):
-    global current_file_index, next_file_index
-    file_index = current_file_index
-    if total_xlsx_rows == 0:
+    file_index = FileFieldFormView.current_file_index
+    if FileFieldFormView.total_xlsx_rows == 0:
         progress_percent = 0
     else:
-        progress_percent = round((processed_rows / total_xlsx_rows) * 100)
-    if next_file_index:
+        progress_percent = round((FileFieldFormView.processed_rows /
+                                  FileFieldFormView.total_xlsx_rows) * 100)
+    if FileFieldFormView.next_file_index:
         progress_percent = 100
         file_index -= 1
-        next_file_index = False
+        FileFieldFormView.next_file_index = False
     return JsonResponse({'progress': progress_percent,
                          'file_index': file_index})
 
