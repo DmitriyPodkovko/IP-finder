@@ -14,7 +14,8 @@ from db.executor import DBExecutor
 from excel.handler import ExcelHandler
 from ipfinder.forms import FileFieldForm
 from config.handler_settings import (ROWS_QUANTITY,
-                                     SETTINGS_FILE_PATH)
+                                     SETTINGS_FILE_PATH,
+                                     EXCEL_OUTPUT_FILE_PREFIX)
 
 
 # @method_decorator(login_required(login_url='login'), name='dispatch')
@@ -69,6 +70,7 @@ class FileFieldFormView(FormView):
                 if db_executor.connect_on():
                     try:
                         DST_numbers_ls = []
+                        DST_numbers_for_get_start_date = set()
                         FileFieldFormView.processed_rows = 0
                         for i, tuple_values in enumerate(ip_list):
                             if FileFieldFormView.is_task_cancelled:
@@ -88,6 +90,7 @@ class FileFieldFormView(FormView):
                             DST_numbers_ls.append(DST_numbers)
                             if (DST_numbers and next(iter(DST_numbers)) != 'ERROR'
                                     and is_admin == 1):
+                                DST_numbers_for_get_start_date.update(DST_numbers)
                                 warning_numbers = db_executor.execute_check_numbers(DST_numbers)
                                 self.request.session['errors'] += db_executor.errors
                                 db_executor.errors = ''
@@ -104,6 +107,14 @@ class FileFieldFormView(FormView):
                                 DST_numbers_ls = []
                                 current_rows_quantity += ROWS_QUANTITY
                             FileFieldFormView.processed_rows += 1
+                        if DST_numbers_for_get_start_date:
+                            start_data_ls = db_executor.execute_get_start_date(
+                                DST_numbers_for_get_start_date)
+                            if start_data_ls:
+                                with open(f'{user_directory}/{file_name}{EXCEL_OUTPUT_FILE_PREFIX}.txt',
+                                          'w', encoding='utf-8') as f:
+                                    for line in start_data_ls:
+                                        f.write(line + '\n')
                     finally:
                         FileFieldFormView.next_file_index = True
                         FileFieldFormView.processed_rows = 0

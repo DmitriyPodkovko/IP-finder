@@ -57,7 +57,7 @@ OPERATORS = {
 
 MOB3_IPS = ()
 MTS_IPS = ('46.133', '89.209', '31.144', '128.124', '178.133')
-KS_IPS = ('46.211', '94.153.112')
+KS_IPS = ('46.211', '94.153', '5.248')
 LIFE_IPS = ('37.73', '46.96', '88.154', '88.155')
 
 # MOB3_INNER_IPS = (10, 37, 192)
@@ -71,5 +71,6 @@ ORACLE_FUNCTIONS = {
     # 'inner_tel_func': 'NEVA.ip_tr.restore_tel_from_inner_ip_list',
     'inner_tel_func': 'NEVA.ip_tr.get_inner_ip_list',
     'check_tel_func': 'NEVA.ip_tr.check_tel',
+    'get_start_date': 'NEVA.get_start_date',
     'check_login_proc': 'check_login'
 }

@@ -101,6 +101,27 @@ class DBExecutor:
             self.errors += 'check numbers error\n'
             return result
 
+    def execute_get_start_date(self, numbers: set) -> list[str]:
+        try:
+            result = []
+            for number in numbers:
+                oracle_func = ORACLE_FUNCTIONS.get('get_start_date')
+                logging.info(f'{oracle_func}, {number}')
+                response = self._cursor.callfunc(oracle_func, datetime,
+                                                 [number])
+                logging.info(f'request done')
+                if response:
+                    dt_str = response.strftime('%d.%m.%Y %H:%M:%S')
+                    result.append(f'{number}\t{dt_str}')
+                    logging.info(f'{dt_str} for {number}')
+                else:
+                    logging.info(f'No start date for {number}')
+            return result
+        except Exception as e:
+            logging.error(f'DB error execute:\n {str(e)}')
+            self.errors += 'get start date error\n'
+            return result
+
 
 class CheckoutIP:
     def __init__(self, first_two_ip_octets, first_three_ip_octets, operator):
